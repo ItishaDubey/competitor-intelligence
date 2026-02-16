@@ -28,8 +28,8 @@ venv/
 ENV/
 env/
 
-# Environment variables
-.env
+# Environment variables (NOT gitignored for Kubernetes deployment)
+# .env
 
 # Intelligence data (generated files)
 intelligence_data/
