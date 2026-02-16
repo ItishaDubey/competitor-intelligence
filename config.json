@@ -1,0 +1,48 @@
+{
+  "_comment": "FLEXIBLE CONFIG - Monitor ANY pages!",
+  "_instructions": "1. Set your baseline (optional), 2. Add competitors, 3. Specify pages to monitor, 4. Choose what to track",
+  
+  "baseline": {
+    "name": "K-Store",
+    "pages_to_monitor": [
+      {
+        "name": "Homepage",
+        "url": "https://kstore.global",
+        "track": ["content", "products", "pricing"]
+      }
+    ]
+  },
+  
+  "competitors": [
+    {
+      "name": "Amazon Gift Cards",
+      "pages_to_monitor": [
+        {
+          "name": "Gift Cards Section",
+          "url": "https://www.amazon.com/gift-cards",
+          "track": ["products", "pricing"]
+        }
+      ]
+    },
+    {
+      "name": "Codashop",
+      "pages_to_monitor": [
+        {
+          "name": "Homepage",
+          "url": "https://www.codashop.com/en-us/",
+          "track": ["content", "products"]
+        }
+      ]
+    },
+    {
+      "name": "BuySellVouchers",
+      "pages_to_monitor": [
+        {
+          "name": "Products",
+          "url": "https://www.buysellvouchers.com/en/",
+          "track": ["content", "products", "pricing"]
+        }
+      ]
+    }
+  ]
+}
