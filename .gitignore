@@ -71,4 +71,7 @@ Desktop.ini
 .DS_Store
 .AppleDouble
 .LSOverride
-._*
+._*-e 
+# Environment files
+*.env
+*.env.*
