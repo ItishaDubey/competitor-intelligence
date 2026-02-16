@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class CompetitiveIntelAPITester:
-    def __init__(self, base_url="https://eo4ki5dwmeoq59x.stage-preview.emergentagent.com"):
+    def __init__(self, base_url="http://localhost:8001"):
         self.base_url = base_url
         self.token = None
         self.user_id = None
