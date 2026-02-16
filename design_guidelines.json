@@ -1,0 +1,111 @@
+{
+  "identity": {
+    "name": "Competitive Intelligence Agent",
+    "persona": "E1 - The Anti-AI Designer",
+    "tone": "Professional, Data-Focused, Trustworthy, Insightful",
+    "theme": "Light Minimal",
+    "design_principles": [
+      "Fusion over Imitation: Mix Swiss Poster layouts with SaaS utility.",
+      "Emotion First: Clarity creates trust.",
+      "Content is King: Data is the hero.",
+      "Zoom In: Focus on the insight, not the noise.",
+      "Negative Space: 2-3x standard spacing."
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Manrope, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold tracking-tight leading-none",
+      "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+      "h3": "text-2xl font-medium tracking-normal",
+      "body": "text-base leading-relaxed text-slate-600",
+      "caption": "text-sm text-slate-500 uppercase tracking-wider"
+    },
+    "rules": "Headings must be bold and dark. Body text should have relaxed line-height for readability."
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#4338ca",
+        "foreground": "#ffffff",
+        "hover": "#3730a3"
+      },
+      "secondary": {
+        "DEFAULT": "#e0e7ff",
+        "foreground": "#3730a3"
+      },
+      "background": "#f8fafc",
+      "surface": "#ffffff",
+      "border": "#e2e8f0",
+      "text": {
+        "primary": "#0f172a",
+        "secondary": "#64748b",
+        "muted": "#94a3b8"
+      },
+      "accent": {
+        "success": "#10b981",
+        "warning": "#f59e0b",
+        "error": "#ef4444",
+        "info": "#3b82f6"
+      }
+    },
+    "usage": "Use 'Slate' scale for neutrals. Primary Indigo is for CTAs and active states only. Background should be Slate-50, not pure white."
+  },
+  "layout": {
+    "grid_system": "Bento Grid Mode B (High Density)",
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing": {
+      "section_gap": "py-24",
+      "component_gap": "gap-8",
+      "internal_padding": "p-6 md:p-8"
+    },
+    "strategies": [
+      "Use 'Grid Borders' style for dashboards: borders between grid items, no outer borders.",
+      "Mobile-First: Stack all grids to 1 column on mobile.",
+      "Sidebar Navigation: Fixed left sidebar for desktop, drawer for mobile."
+    ]
+  },
+  "components": {
+    "strategy": "Shadcn UI (Customized for JS)",
+    "styling": {
+      "radius": "rounded-md",
+      "shadows": "shadow-sm for cards, shadow-xl for dropdowns/modals",
+      "borders": "border-slate-200"
+    },
+    "specific_components": {
+      "Card": "Flat, 1px border, white background. No shadow by default.",
+      "Button": "Sharp corners or small radius (rounded-md). High contrast.",
+      "Input": "Bg-white, border-slate-200, focus:ring-2 focus:ring-indigo-500.",
+      "Table": "Clean rows, border-b only. Hover state on rows."
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Use backdrop-blur-md bg-white/80 for sticky headers.",
+    "gradients": "No large background gradients. Subtle mesh gradients allowed in empty states only.",
+    "icons": "Lucide React (Stroke width 1.5px)",
+    "charts": "Recharts (via Shadcn). Prefer Bar Charts for comparisons. Use Indigo palette for data series."
+  },
+  "images": {
+    "login_background": "https://images.unsplash.com/photo-1765046255517-412341954c4c?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "login_bg_alt": "Clean, white, abstract grid pattern.",
+    "rules": "Use the provided image for the Auth pages background with an overlay (white/90) to ensure text readability."
+  },
+  "universal_guidelines": {
+    "file_extension": "Use .js and .jsx for all React files. Do not use .ts or .tsx.",
+    "testing": "All interactive elements must have a 'data-testid' attribute (kebab-case).",
+    "accessibility": "Ensure contrast ratio of 4.5:1. Use semantic HTML.",
+    "code_style": "Functional components. Named exports for components, default exports for pages."
+  },
+  "instructions_to_main_agent": [
+    "Initialize a React app (Vite) if not present.",
+    "Install Tailwind CSS and configure with the 'Slate' and 'Indigo' palette.",
+    "Install 'lucide-react', 'recharts', 'clsx', 'tailwind-merge'.",
+    "Create a 'components/ui' folder and implement basic Shadcn-like components (Button, Input, Card, Label) manually in .jsx as Shadcn CLI is TS-first.",
+    "Implement the 'Dashboard' using the Bento Grid layout.",
+    "Use the provided image for the Login page background."
+  ]
+}
