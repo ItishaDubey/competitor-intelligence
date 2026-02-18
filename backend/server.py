@@ -1,12 +1,9 @@
 import os
-import re
-import json
-import asyncio
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional
+from typing import Optional
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, status
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
@@ -15,21 +12,22 @@ from jose import jwt, JWTError
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 
-# --- NEW MODULE IMPORTS ---
-# Ensure backend/scraper.py and backend/analysis.py exist!
-from .scraper import scrape_url_smart
-from .analysis import generate_strategic_brief
+# --- IMPORTS ---
+try:
+    from backend.scraper import scrape_url_smart
+    from backend.analysis import generate_strategic_brief
+except ImportError:
+    from scraper import scrape_url_smart
+    from analysis import generate_strategic_brief
 
 # --- CONFIG ---
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = "competitive_intelligence"
-JWT_SECRET = os.environ.get("JWT_SECRET", "super_secret_key_change_me")
+JWT_SECRET = "agent_2026_secure_key"
 
-# --- AUTH SETUP ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
-# --- DATABASE SETUP ---
 client = None
 db = None
 
@@ -39,21 +37,16 @@ async def lifespan(app: FastAPI):
     try:
         client = AsyncIOMotorClient(MONGO_URL)
         db = client[DB_NAME]
-        # Verify connection
         await client.admin.command('ping')
         print("✅ Connected to MongoDB")
-        
-        # Create indexes
         await db.users.create_index("email", unique=True)
     except Exception as e:
         print(f"❌ MongoDB Connection Failed: {e}")
     yield
-    if client:
-        client.close()
+    if client: client.close()
 
-app = FastAPI(title="Competitive Intelligence API", lifespan=lifespan)
+app = FastAPI(title="Competitor Intelligence Agent", lifespan=lifespan)
 
-# --- CORS ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -72,15 +65,15 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class PageConfig(BaseModel):
-    url: str
-    name: Optional[str] = None
-
 class CompetitorCreate(BaseModel):
     name: str
     website: str
     is_baseline: bool = False
-    pages_to_monitor: List[PageConfig] = []
+
+class CompetitorUpdate(BaseModel):
+    name: Optional[str] = None
+    website: Optional[str] = None
+    is_baseline: Optional[bool] = None
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -97,60 +90,39 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     try:
         token = credentials.credentials
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user_id = payload.get("sub")
-        if not user_id: raise HTTPException(status_code=401, detail="Invalid token")
-        return {"id": user_id, "email": payload.get("email")}
+        return {"id": payload.get("sub"), "email": payload.get("email")}
     except JWTError:
-        raise HTTPException(status_code=401, detail="Could not validate credentials")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-# --- AUTH ENDPOINTS ---
-
+# --- AUTH ROUTES ---
 @app.post("/api/auth/register", response_model=TokenResponse)
 async def register(user: UserRegister):
-    if not db: raise HTTPException(status_code=500, detail="Database not connected")
-    
-    existing = await db.users.find_one({"email": user.email})
-    if existing:
+    email_clean = user.email.lower()
+    if await db.users.find_one({"email": email_clean}):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     hashed_pw = pwd_context.hash(user.password)
-    user_doc = {
-        "name": user.name,
-        "email": user.email,
-        "password": hashed_pw,
+    res = await db.users.insert_one({
+        "name": user.name, "email": email_clean, "password": hashed_pw, 
         "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    result = await db.users.insert_one(user_doc)
-    user_id = str(result.inserted_id)
-    
-    token = create_token(user_id, user.email)
-    return {
-        "access_token": token,
-        "user": {"id": user_id, "name": user.name, "email": user.email}
-    }
+    })
+    uid = str(res.inserted_id)
+    return {"access_token": create_token(uid, email_clean), "user": {"id": uid, "name": user.name, "email": email_clean}}
 
 @app.post("/api/auth/login", response_model=TokenResponse)
 async def login(user: UserLogin):
-    if not db: raise HTTPException(status_code=500, detail="Database not connected")
-
-    db_user = await db.users.find_one({"email": user.email})
-    if not db_user or not pwd_context.verify(user.password, db_user["password"]):
+    u = await db.users.find_one({"email": user.email.lower()})
+    if not u or not pwd_context.verify(user.password, u["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    token = create_token(str(db_user["_id"]), db_user["email"])
-    return {
-        "access_token": token,
-        "user": {"id": str(db_user["_id"]), "name": db_user["name"], "email": db_user["email"]}
-    }
+    uid = str(u["_id"])
+    return {"access_token": create_token(uid, u["email"]), "user": {"id": uid, "name": u["name"], "email": u["email"]}}
 
 @app.get("/api/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
-    user = await db.users.find_one({"_id": ObjectId(current_user["id"])})
-    if not user: raise HTTPException(status_code=404)
-    return {"id": str(user["_id"]), "name": user["name"], "email": user["email"]}
+    u = await db.users.find_one({"_id": ObjectId(current_user["id"])})
+    return {"id": str(u["_id"]), "name": u["name"], "email": u["email"]} if u else {}
 
-# --- COMPETITOR ENDPOINTS ---
-
+# --- COMPETITOR ROUTES ---
 @app.get("/api/competitors")
 async def list_competitors(current_user: dict = Depends(get_current_user)):
     comps = await db.competitors.find({"user_id": current_user["id"]}).to_list(100)
@@ -159,85 +131,70 @@ async def list_competitors(current_user: dict = Depends(get_current_user)):
 
 @app.post("/api/competitors")
 async def create_competitor(comp: CompetitorCreate, current_user: dict = Depends(get_current_user)):
-    # Unset other baselines if this is one
     if comp.is_baseline:
-        await db.competitors.update_many(
-            {"user_id": current_user["id"], "is_baseline": True},
-            {"$set": {"is_baseline": False}}
-        )
-
-    doc = comp.dict()
-    doc["user_id"] = current_user["id"]
-    doc["created_at"] = datetime.now(timezone.utc).isoformat()
-    
+        await db.competitors.update_many({"user_id": current_user["id"]}, {"$set": {"is_baseline": False}})
+    doc = comp.dict(); doc["user_id"] = current_user["id"]
     res = await db.competitors.insert_one(doc)
-    doc["id"] = str(res.inserted_id)
-    del doc["_id"]
+    doc["id"] = str(res.inserted_id); del doc["_id"]
     return doc
 
-# --- REPORT & SCAN ENDPOINTS (THE NEW LOGIC) ---
+@app.put("/api/competitors/{comp_id}")
+async def update_competitor(comp_id: str, comp: CompetitorUpdate, current_user: dict = Depends(get_current_user)):
+    data = {k: v for k, v in comp.dict().items() if v is not None}
+    if comp.is_baseline:
+        await db.competitors.update_many({"user_id": current_user["id"]}, {"$set": {"is_baseline": False}})
+    res = await db.competitors.update_one({"_id": ObjectId(comp_id), "user_id": current_user["id"]}, {"$set": data})
+    if res.matched_count == 0: raise HTTPException(404, detail="Competitor not found")
+    return {"status": "updated", "id": comp_id}
 
+@app.delete("/api/competitors/{comp_id}")
+async def delete_competitor(comp_id: str, current_user: dict = Depends(get_current_user)):
+    res = await db.competitors.delete_one({"_id": ObjectId(comp_id), "user_id": current_user["id"]})
+    if res.deleted_count == 0: raise HTTPException(404, detail="Competitor not found")
+    return {"status": "deleted"}
+
+# --- REPORT ROUTES ---
 async def run_scan_task(user_id: str):
-    """Background task: Scrapes sites & generates the Strategic Brief"""
-    print(f"🚀 Starting scan for user {user_id}")
+    comps = await db.competitors.find({"user_id": user_id}).to_list(100)
+    if not comps: return
+    baseline = next((c for c in comps if c.get("is_baseline")), None)
+    baseline_data = await scrape_url_smart(baseline['website']) if baseline else None
     
-    # 1. Fetch competitors
-    competitors = await db.competitors.find({"user_id": user_id}).to_list(100)
-    if not competitors:
-        print("⚠️ No competitors found for scan.")
-        return
-
-    scraped_results = []
-    baseline_result = None
+    results = []
+    for c in comps:
+        if not c.get("is_baseline"):
+            data = await scrape_url_smart(c['website'])
+            results.append({**data, "name": c['name']})
     
-    # 2. Scrape Baseline
-    baseline = next((c for c in competitors if c.get("is_baseline")), None)
-    if baseline:
-        # Get first monitored page
-        pages = baseline.get("pages_to_monitor", [])
-        url = pages[0].get("url") if pages else baseline.get("website")
-        
-        if url:
-            print(f"  🏠 Scraping Baseline: {baseline['name']} ({url})")
-            data = await scrape_url_smart(url)
-            baseline_result = {**data, "name": baseline["name"]}
-
-    # 3. Scrape Competitors
-    for comp in competitors:
-        if comp.get("is_baseline"): continue
-        
-        pages = comp.get("pages_to_monitor", [])
-        url = pages[0].get("url") if pages else comp.get("website")
-        
-        if url:
-            print(f"  🎯 Scraping Competitor: {comp['name']} ({url})")
-            data = await scrape_url_smart(url)
-            scraped_results.append({**data, "name": comp["name"]})
-
-    # 4. Generate Strategic Brief
-    brief = generate_strategic_brief(scraped_results, baseline_result)
-    
-    # 5. Save Report
-    report_doc = {
-        "user_id": user_id,
-        "report_date": datetime.now(timezone.utc).strftime("%B %d, %Y • %H:%M"),
-        "brief_data": brief,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.reports.insert_one(report_doc)
-    print("✅ Scan Complete. Report Saved.")
+    brief = generate_strategic_brief(results, baseline_data)
+    await db.reports.insert_one({
+        "user_id": user_id, "report_date": datetime.now(timezone.utc).strftime("%B %d, %Y"), 
+        "brief_data": brief, "created_at": datetime.now(timezone.utc).isoformat()
+    })
 
 @app.post("/api/reports/run")
 async def run_scan(background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     background_tasks.add_task(run_scan_task, current_user["id"])
-    return {"status": "started", "message": "Intelligence scan started in background"}
+    return {"status": "started"}
 
 @app.get("/api/reports")
 async def get_reports(current_user: dict = Depends(get_current_user)):
-    # Return latest reports first
     reports = await db.reports.find({"user_id": current_user["id"]}).sort("created_at", -1).to_list(20)
     for r in reports: r["id"] = str(r["_id"]); del r["_id"]
     return reports
+
+@app.get("/api/dashboard/stats")
+async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
+    return {
+        "competitors_count": await db.competitors.count_documents({"user_id": current_user["id"]}),
+        "reports_count": await db.reports.count_documents({"user_id": current_user["id"]}),
+        "active_alerts": 0 
+    }
+
+@app.get("/api/reports/latest/summary")
+async def get_latest_summary(current_user: dict = Depends(get_current_user)):
+    latest = await db.reports.find_one({"user_id": current_user["id"]}, sort=[("created_at", -1)])
+    return {"summary": (latest["brief_data"][:200] + "...") if latest else "No reports yet."}
 
 if __name__ == "__main__":
     import uvicorn

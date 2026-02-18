@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getCompetitors, createCompetitor, updateCompetitor, deleteCompetitor } from '../api';
+import { getCompetitors, createCompetitor, deleteCompetitor, updateCompetitor } from '../lib/api';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/Label';
