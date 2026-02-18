@@ -7,7 +7,7 @@
     "pages_to_monitor": [
       {
         "name": "Homepage",
-        "url": "https://kstore.global",
+        "url": "https://kstore.global/digital-vouchers",
         "track": ["content", "products", "pricing"]
       }
     ]
@@ -15,12 +15,12 @@
   
   "competitors": [
     {
-      "name": "Amazon Gift Cards",
+      "name": "99Gifts",
       "pages_to_monitor": [
         {
           "name": "Gift Cards Section",
-          "url": "https://www.amazon.com/gift-cards",
-          "track": ["products", "pricing"]
+          "url": "http://99gift.in/",
+          "track":["pricing", "products", "content"]
         }
       ]
     },
@@ -30,16 +30,36 @@
         {
           "name": "Homepage",
           "url": "https://www.codashop.com/en-us/",
-          "track": ["content", "products"]
+          "track": ["pricing", "products", "content"]
         }
       ]
     },
     {
-      "name": "BuySellVouchers",
+      "name": "Rooter",
       "pages_to_monitor": [
         {
           "name": "Products",
-          "url": "https://www.buysellvouchers.com/en/",
+          "url": "https://shop.rooter.gg/product/valorant-points",
+          "track": ["content", "products", "pricing"]
+        }
+      ]
+    },
+    {
+      "name": "Gyftr",
+      "pages_to_monitor": [
+        {
+          "name": "Products",
+          "url": "https://www.gyftr.com/",
+          "track": ["content", "products", "pricing"]
+        }
+      ]
+    },
+    {
+      "name": "Amazon",
+      "pages_to_monitor": [
+        {
+          "name": "Products",
+          "url": "https://www.amazon.in/s?k=amazon+gift+voucher&adgrpid=59204622376&ext_vrnc=hi&hvadid=590692608886&hvdev=c&hvlocphy=9062010&hvnetw=g&hvqmt=e&hvrand=174759545371879856&hvtargid=kwd-298925344460&hydadcr=14558_2262485&mcid=7e392ce86c3e3b9893f1cc7b01d394c3&tag=googinhydr1-21&ref=pd_sl_yi0bvn994_e",
           "track": ["content", "products", "pricing"]
         }
       ]
