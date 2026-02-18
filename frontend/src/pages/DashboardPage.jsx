@@ -14,11 +14,9 @@ import {
   Loader2,
   ChevronRight,
   AlertCircle,
-  CheckCircle2,
   Clock,
   Zap,
   LogOut,
-  Settings,
   Menu,
   X
 } from 'lucide-react';

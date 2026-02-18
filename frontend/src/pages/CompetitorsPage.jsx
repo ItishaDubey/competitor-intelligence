@@ -15,12 +15,10 @@ import {
   X, 
   Loader2,
   Globe,
-  FileText,
   ChevronDown,
   ChevronUp,
   LogOut,
   Menu,
-  CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 
