@@ -1,6 +1,6 @@
 """
-Clean Report Generator
-Focused on what matters: products, prices, changes
+Professional Competitive Intelligence Report Generator
+Generates Board-Ready HTML Executive Summaries.
 """
 
 import json
@@ -8,209 +8,281 @@ import glob
 import os
 from datetime import datetime
 
-def load_latest_digest():
-    files = glob.glob('intelligence_data/digest_*.json')
-    if not files:
-        return None
-    latest = max(files, key=os.path.getctime)
-    with open(latest) as f:
-        return json.load(f)
+class ExecutiveReportGenerator:
+    def __init__(self):
+        self.data_dir = 'intelligence_data'
+        self.output_file = 'strategic_intelligence_brief.html'
 
-def generate_html(digest):
-    html = f"""
+    def load_latest_digest(self):
+        files = glob.glob(os.path.join(self.data_dir, 'digest_*.json'))
+        if not files:
+            return None
+        latest = max(files, key=os.path.getctime)
+        with open(latest) as f:
+            return json.load(f)
+
+    def _generate_insight_logic(self, digest):
+        """Generates rule-based strategic insights"""
+        insights = []
+        results = digest.get('detailed_results', [])
+        baseline = next((r for r in results if r.get('is_baseline')), None)
+        
+        # 1. Price Positioning Analysis
+        if baseline and baseline.get('price_range'):
+            base_avg = baseline['price_range']['avg']
+            for comp in results:
+                if comp == baseline or not comp.get('price_range'): continue
+                
+                comp_avg = comp['price_range']['avg']
+                diff = ((comp_avg - base_avg) / base_avg) * 100
+                
+                if diff < -10:
+                    insights.append({
+                        "title": "Aggressive Undercutting Detected",
+                        "severity": "high",
+                        "text": f"**{comp['company']}** is pricing {abs(diff):.1f}% lower than your baseline. This signals a potential loss-leader strategy or lower cost structure."
+                    })
+                elif diff > 10:
+                    insights.append({
+                        "title": "Premium Market Positioning",
+                        "severity": "low",
+                        "text": f"**{comp['company']}** maintains a premium position, pricing {diff:.1f}% higher. Monitor their feature set for value-add differentiators."
+                    })
+
+        # 2. Activity/Catalog Velocity
+        for comp in results:
+            changes = comp.get('changes', {})
+            new_prods = len(changes.get('new_products', []))
+            if new_prods > 2:
+                insights.append({
+                    "title": "Catalog Expansion Event",
+                    "severity": "medium",
+                    "text": f"**{comp['company']}** added {new_prods} new SKUs recently. They may be entering a new vertical or refreshing inventory."
+                })
+
+        # 3. Data Quality / Stagnation Warning (The "Zero Changes" issue you mentioned)
+        zero_change_comps = [r['company'] for r in results if not r.get('changes')]
+        if len(zero_change_comps) > 1:
+            insights.append({
+                "title": "Market Stagnation / Monitoring Alert",
+                "severity": "info",
+                "text": f"No activity detected for: {', '.join(zero_change_comps)}. Verify if competitors are inactive or if monitoring selectors need recalibration."
+            })
+
+        if not insights:
+            insights.append({
+                "title": "Market Stability",
+                "severity": "low",
+                "text": "No significant pricing or catalog shifts detected in this cycle. Market appears stable."
+            })
+            
+        return insights
+
+    def generate_html(self, digest):
+        insights = self._generate_insight_logic(digest)
+        results = digest.get('detailed_results', [])
+        baseline = next((r for r in results if r.get('is_baseline')), None)
+        competitors = [r for r in results if not r.get('is_baseline')]
+        
+        # Calculate Market Stats
+        total_skus = sum(r.get('products_found', 0) for r in results)
+        avg_market_price = 0
+        prices = [r['price_range']['avg'] for r in results if r.get('price_range')]
+        if prices:
+            avg_market_price = sum(prices) / len(prices)
+
+        html = f"""
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Competitive Intelligence Report</title>
+    <title>Strategic Intelligence Brief</title>
     <style>
-        body {{ font-family: -apple-system, system-ui, sans-serif; max-width: 1200px; 
-               margin: 0 auto; padding: 20px; background: #f5f5f5; }}
-        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                  color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; }}
-        .header h1 {{ margin: 0; }}
-        .header p {{ margin: 10px 0 0; opacity: 0.9; }}
-        .stats {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                 gap: 15px; margin-bottom: 30px; }}
-        .stat {{ background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
-        .stat-label {{ color: #666; font-size: 0.85em; text-transform: uppercase; }}
-        .stat-value {{ font-size: 2.5em; font-weight: bold; color: #333; margin-top: 5px; }}
-        .company-card {{ background: white; padding: 25px; margin-bottom: 20px; 
-                        border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
-        .company-name {{ font-size: 1.4em; font-weight: bold; margin-bottom: 15px; }}
-        .baseline {{ border-left: 4px solid #667eea; }}
-        .competitor {{ border-left: 4px solid #764ba2; }}
-        .has-changes {{ border-left-color: #e74c3c; }}
-        .info-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-                     gap: 15px; margin: 15px 0; }}
-        .info-item {{ background: #f8f9fa; padding: 15px; border-radius: 6px; }}
-        .info-label {{ font-size: 0.85em; color: #666; }}
-        .info-value {{ font-size: 1.3em; font-weight: bold; color: #333; margin-top: 5px; }}
-        .change-badge {{ background: #e74c3c; color: white; padding: 4px 12px; 
-                        border-radius: 20px; font-size: 0.85em; margin-left: 10px; }}
-        .changes-section {{ background: #fff3cd; padding: 15px; margin: 15px 0; 
-                           border-radius: 6px; border-left: 4px solid #ffc107; }}
-        .insight-section {{ background: #d1ecf1; padding: 15px; margin: 15px 0; 
-                           border-radius: 6px; border-left: 4px solid #17a2b8; }}
-        .priority-high {{ border-left-color: #e74c3c; background: #f8d7da; }}
-        .priority-medium {{ border-left-color: #ffc107; background: #fff3cd; }}
-        .products-list {{ margin-top: 15px; }}
-        .product-item {{ padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 4px; }}
-        .product-name {{ font-weight: 500; }}
-        .product-price {{ color: #667eea; font-weight: bold; margin-left: 10px; }}
-        a {{ color: #667eea; text-decoration: none; }}
-        a:hover {{ text-decoration: underline; }}
+        :root {{
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --success: #27ae60;
+            --light: #ecf0f1;
+            --text: #34495e;
+            --border: #bdc3c7;
+        }}
+        body {{ font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--text); background: #f8f9fa; margin: 0; padding: 40px; line-height: 1.6; }}
+        .container {{ max-width: 1000px; margin: 0 auto; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; }}
+        
+        /* Header */
+        .header {{ background: var(--primary); color: white; padding: 40px; position: relative; }}
+        .header h1 {{ margin: 0; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; font-size: 24px; }}
+        .header .meta {{ opacity: 0.7; font-size: 14px; margin-top: 10px; }}
+        .badge {{ position: absolute; top: 40px; right: 40px; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); }}
+
+        /* Executive Summary & Insights */
+        .section {{ padding: 40px; border-bottom: 1px solid var(--light); }}
+        .section-title {{ font-size: 18px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; font-weight: 700; border-left: 4px solid var(--accent); padding-left: 15px; }}
+        
+        .kpi-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }}
+        .kpi-card {{ background: var(--light); padding: 20px; border-radius: 6px; text-align: center; }}
+        .kpi-value {{ font-size: 32px; font-weight: 700; color: var(--primary); }}
+        .kpi-label {{ font-size: 12px; text-transform: uppercase; color: #7f8c8d; letter-spacing: 1px; margin-top: 5px; }}
+
+        .insight-card {{ border-left: 4px solid #ccc; background: #fff; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }}
+        .insight-card.high {{ border-left-color: var(--danger); }}
+        .insight-card.medium {{ border-left-color: var(--warning); }}
+        .insight-card.low {{ border-left-color: var(--success); }}
+        .insight-card.info {{ border-left-color: var(--accent); }}
+        .insight-title {{ font-weight: 700; margin-bottom: 5px; display: block; }}
+        
+        /* Competitor Matrix */
+        table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+        th {{ text-align: left; color: #7f8c8d; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; padding: 15px; border-bottom: 2px solid var(--light); }}
+        td {{ padding: 15px; border-bottom: 1px solid var(--light); vertical-align: middle; }}
+        .comp-name {{ font-weight: 600; color: var(--primary); }}
+        .baseline-row {{ background: #f8fbfd; }}
+        .trend-up {{ color: var(--danger); font-size: 12px; }}
+        .trend-down {{ color: var(--success); font-size: 12px; }}
+        
+        /* Footer */
+        .footer {{ background: var(--light); padding: 20px 40px; text-align: center; font-size: 12px; color: #7f8c8d; }}
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🎯 Competitive Intelligence Report</h1>
-        <p><strong>Generated:</strong> {digest['report_date']}</p>
-    </div>
+    <div class="container">
+        <div class="header">
+            <span class="badge">Confidential • Internal Use Only</span>
+            <h1>Competitive Intelligence Brief</h1>
+            <div class="meta">Generated: {datetime.now().strftime('%B %d, %Y • %H:%M')}</div>
+        </div>
 
-    <div class="stats">
-        <div class="stat">
-            <div class="stat-label">Companies Monitored</div>
-            <div class="stat-value">{digest['summary']['companies_monitored']}</div>
-        </div>
-        <div class="stat">
-            <div class="stat-label">Products Tracked</div>
-            <div class="stat-value">{digest['summary']['total_products_tracked']}</div>
-        </div>
-        <div class="stat">
-            <div class="stat-label">Changes Detected</div>
-            <div class="stat-value">{digest['summary']['changes_detected']}</div>
-        </div>
-        <div class="stat">
-            <div class="stat-label">Insights Generated</div>
-            <div class="stat-value">{digest['summary']['insights_generated']}</div>
-        </div>
-    </div>
-"""
-
-    for result in digest.get('detailed_results', []):
-        is_baseline = result.get('is_baseline', False)
-        has_changes = 'changes' in result
-        
-        card_class = 'company-card '
-        card_class += 'baseline' if is_baseline else 'competitor'
-        if has_changes:
-            card_class += ' has-changes'
-        
-        html += f"""
-    <div class="{card_class}">
-        <div class="company-name">
-            {'🏠' if is_baseline else '🎯'} {result['company']}
-            {' <span class="change-badge">CHANGES</span>' if has_changes else ''}
-        </div>
-        <div><a href="{result['url']}" target="_blank">{result['url']}</a></div>
-        
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Products Found</div>
-                <div class="info-value">{result.get('products_found', 0)}</div>
+        <div class="section">
+            <div class="section-title">Executive Summary</div>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-value">{len(competitors)}</div>
+                    <div class="kpi-label">Competitors Tracked</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">{total_skus}</div>
+                    <div class="kpi-label">Total Products Scanned</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">${avg_market_price:.2f}</div>
+                    <div class="kpi-label">Avg Market Price</div>
+                </div>
             </div>
+
+            {self._render_insights(insights)}
+        </div>
+
+        <div class="section">
+            <div class="section-title">Market Landscape Matrix</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Entity</th>
+                        <th>Positioning</th>
+                        <th>Avg Price</th>
+                        <th>Catalog Size</th>
+                        <th>Recent Activity</th>
+                    </tr>
+                </thead>
+                <tbody>
 """
-        
-        if result.get('price_range'):
-            pr = result['price_range']
+        # Render Baseline Row
+        if baseline:
+            pr = baseline.get('price_range', {'avg': 0})
             html += f"""
-            <div class="info-item">
-                <div class="info-label">Price Range</div>
-                <div class="info-value">${pr['min']:.2f} - ${pr['max']:.2f}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Avg Price</div>
-                <div class="info-value">${pr['avg']:.2f}</div>
-            </div>
-"""
-        
+                    <tr class="baseline-row">
+                        <td class="comp-name">🏠 {baseline['company']} (You)</td>
+                        <td><span style="background:#2c3e50; color:white; padding:2px 8px; border-radius:4px; font-size:11px;">BASELINE</span></td>
+                        <td>${pr['avg']:.2f}</td>
+                        <td>{baseline.get('products_found', 0)} SKUs</td>
+                        <td>-</td>
+                    </tr>
+            """
+
+        # Render Competitors
+        for comp in competitors:
+            pr = comp.get('price_range', {'avg': 0})
+            
+            # Calculate Positioning vs Baseline
+            pos_text = "N/A"
+            if baseline and baseline.get('price_range'):
+                base_avg = baseline['price_range']['avg']
+                diff = ((pr['avg'] - base_avg) / base_avg) * 100
+                color = "var(--text)"
+                if diff > 5: 
+                    pos_text = f"Premium (+{diff:.0f}%)"
+                    color = "var(--danger)"
+                elif diff < -5: 
+                    pos_text = f"Value ({diff:.0f}%)"
+                    color = "var(--success)"
+                else: 
+                    pos_text = "Parity"
+
+            # Activity Text
+            changes = comp.get('changes', {})
+            activity_text = "No recent changes"
+            if changes:
+                parts = []
+                if 'new_products' in changes: parts.append(f"+{len(changes['new_products'])} New")
+                if 'price_changes' in changes: parts.append(f"{len(changes['price_changes'])} Price Updates")
+                if parts: activity_text = ", ".join(parts)
+
+            html += f"""
+                    <tr>
+                        <td class="comp-name">🎯 {comp['company']}</td>
+                        <td style="color:{color}; font-weight:500;">{pos_text}</td>
+                        <td>${pr['avg']:.2f}</td>
+                        <td>{comp.get('products_found', 0)} SKUs</td>
+                        <td>{activity_text}</td>
+                    </tr>
+            """
+
         html += """
+                </tbody>
+            </table>
         </div>
-"""
-        
-        # Changes
-        if result.get('changes'):
-            changes = result['changes']
-            html += """
-        <div class="changes-section">
-            <strong>🔄 Changes Detected:</strong><br>
-"""
-            if changes.get('new_products'):
-                html += f"<br><strong>New Products:</strong> {', '.join(changes['new_products'][:5])}"
-                if len(changes['new_products']) > 5:
-                    html += f" (+{len(changes['new_products'])-5} more)"
-            
-            if changes.get('removed_products'):
-                html += f"<br><strong>Removed:</strong> {', '.join(changes['removed_products'][:5])}"
-            
-            if changes.get('price_changes'):
-                html += "<br><strong>Price Changes:</strong><br>"
-                for pc in changes['price_changes'][:5]:
-                    html += f"• {pc['product']}: {pc['old_price']} → {pc['new_price']}<br>"
-            
-            if changes.get('avg_price_change'):
-                apc = changes['avg_price_change']
-                html += f"<br><strong>Average Price:</strong> ${apc['old_avg']:.2f} → ${apc['new_avg']:.2f} ({apc['change_pct']:+.1f}%)"
-            
-            html += """
+
+        <div class="footer">
+            Automated Intelligence Agent v2.1 • Data is subject to scraper accuracy • <a href="#">View Raw Data</a>
         </div>
-"""
-        
-        # Insights
-        if result.get('insights'):
-            for insight in result['insights']:
-                priority = insight.get('priority', 'medium')
-                html += f"""
-        <div class="insight-section priority-{priority}">
-            <strong>[{priority.upper()}]</strong> {insight['message']}<br>
-            <em>→ {insight['recommendation']}</em>
-        </div>
-"""
-        
-        # Sample products
-        if result.get('sample_products'):
-            html += """
-        <div class="products-list">
-            <strong>Sample Products:</strong>
-"""
-            for product in result['sample_products']:
-                price_display = f'<span class="product-price">{product.get("price", "")}</span>' if product.get('price') else ''
-                html += f"""
-            <div class="product-item">
-                <span class="product-name">{product['name']}</span>{price_display}
-            </div>
-"""
-            html += """
-        </div>
-"""
-        
-        html += """
     </div>
-"""
-    
-    html += """
 </body>
 </html>
 """
-    return html
+        return html
 
-def main():
-    print("📊 Generating Report...\n")
-    
-    digest = load_latest_digest()
-    if not digest:
-        print("❌ No data found. Run the agent first:")
-        print("   python competitive_intelligence_agent.py")
-        return
-    
-    html = generate_html(digest)
-    
-    with open('competitive_intelligence_report.html', 'w') as f:
-        f.write(html)
-    
-    print("✅ Report generated: competitive_intelligence_report.html")
-    print("   Open it in your browser!\n")
+    def _render_insights(self, insights):
+        html = ""
+        for i in insights:
+            html += f"""
+            <div class="insight-card {i['severity']}">
+                <span class="insight-title">{i['title']}</span>
+                {i['text']}
+            </div>
+            """
+        return html
+
+    def run(self):
+        print("📊 Generating Strategic Brief...")
+        digest = self.load_latest_digest()
+        if not digest:
+            print("❌ No data found. Run the agent first!")
+            return
+
+        html = self.generate_html(digest)
+        with open(self.output_file, 'w', encoding='utf-8') as f:
+            f.write(html)
+        
+        print(f"✅ Report Generated: {self.output_file}")
+        # Try to open automatically on Mac/Windows
+        try:
+            if os.name == 'nt': os.startfile(self.output_file)
+            else: os.system(f'open "{self.output_file}"')
+        except:
+            pass
 
 if __name__ == "__main__":
-    main()
+    generator = ExecutiveReportGenerator()
+    generator.run()
