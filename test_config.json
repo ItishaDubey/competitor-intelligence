@@ -1,0 +1,17 @@
+{
+  "baseline": {
+    "name": "Test Baseline",
+    "url": "https://kstore.global/digital-vouchers/"
+  },
+  "competitors": [
+   
+        {
+      "name": "Test Competitor2",
+      "url": "https://www.woohoo.in/?srsltid=AfmBOopAr3yTdXXacG1XoVKa8teNisPxuXgOcQ9Klt_6mURz-0VuLB7p"
+       },
+        {
+      "name": "Test Competitor3",
+      "url": "https://www.flipkart.com/the-gift-card-store"
+       }
+  ]
+}
