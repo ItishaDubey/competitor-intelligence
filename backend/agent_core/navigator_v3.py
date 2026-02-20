@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
+import time
 
 
 class Navigator:
@@ -10,109 +11,110 @@ class Navigator:
 
         product_links = []
 
+        base_domain = urlparse(url).netloc
+
+        MAX_CATEGORIES = 4
+        MAX_PRODUCTS = 60
+        CATEGORY_TIMEOUT = 12  # seconds per category
+
         with sync_playwright() as p:
 
             browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
 
-            context = browser.new_context(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-            )
-
-            page = context.new_page()
-
-            # ------------------------------
-            # STEP 0 — OPEN PAGE SAFELY
-            # ------------------------------
             page.goto(url, timeout=60000)
-            page.wait_for_load_state("domcontentloaded")
-            page.wait_for_timeout(2500)
+            page.wait_for_timeout(3000)
 
-            # ------------------------------
-            # STEP 1 — FIND CATEGORY LINKS
-            # ------------------------------
-            anchors = page.locator("a")
+            anchors = page.locator("a").all()
 
             category_links = []
 
-            anchor_count = min(anchors.count(), 150)
-
-            for i in range(anchor_count):
+            # ------------------------------------------------
+            # STEP 1 — STRICT CATEGORY FILTER
+            # ------------------------------------------------
+            for a in anchors:
 
                 try:
-                    a = anchors.nth(i)
-
                     href = a.get_attribute("href") or ""
                     text = (a.inner_text() or "").lower()
 
-                    # ❌ Ignore garbage navigation
-                    if any(x in text for x in [
-                        "login", "account", "cart", "privacy",
-                        "terms", "footer", "contact", "help"
+                    full = urljoin(url, href)
+
+                    parsed = urlparse(full)
+
+                    # ✅ SAME DOMAIN ONLY
+                    if parsed.netloc != base_domain:
+                        continue
+
+                    # ❌ BLOCK garbage pages
+                    if any(x in full.lower() for x in [
+                        "faq", "privacy", "login", "account",
+                        "google.com", "youtube", "help"
                     ]):
                         continue
 
-                    # ✅ Category patterns
-                    if any(x in href.lower() for x in [
+                    if any(x in full.lower() for x in [
                         "gift", "voucher", "category", "store"
                     ]):
-                        category_links.append(urljoin(url, href))
+                        category_links.append(full)
 
                 except:
-                    continue
+                    pass
 
-            category_links = list(set(category_links))[:5]
+            category_links = list(set(category_links))[:MAX_CATEGORIES]
 
             print(f"📂 Categories detected: {len(category_links)}")
 
-            # ------------------------------
-            # STEP 2 — ENTER CATEGORIES
-            # ------------------------------
+            # ------------------------------------------------
+            # STEP 2 — PRODUCT DISCOVERY
+            # ------------------------------------------------
             for cat in category_links:
 
+                print(f"➡️ Entering category: {cat}")
+
+                start = time.time()
+
                 try:
-                    print(f"➡️ Entering category: {cat}")
+                    page.goto(cat, timeout=30000)
+                    page.wait_for_timeout(2500)
 
-                    page.goto(cat, timeout=60000)
-                    page.wait_for_load_state("domcontentloaded")
-                    page.wait_for_timeout(2000)
-
-                    # Detect grid-like structures
                     cards = page.locator(
-                        "[class*=product], [class*=card], [class*=grid], [data-testid*=product]"
-                    )
+                        "[class*=product], [class*=card], [class*=grid]"
+                    ).all()
 
-                    # 🚨 HARD LIMIT — prevents Amazon freeze
-                    card_count = min(cards.count(), 40)
+                    for c in cards:
 
-                    for i in range(card_count):
+                        # ⏱ TIME SAFETY
+                        if time.time() - start > CATEGORY_TIMEOUT:
+                            print("⏱ Category timeout reached")
+                            break
 
-                        try:
-                            c = cards.nth(i)
+                        link = c.locator("a").first
 
-                            link = c.locator("a").first
-                            href = link.get_attribute("href") if link else None
+                        href = link.get_attribute("href") if link else None
 
-                            if not href:
-                                continue
-
-                            # ❌ Ignore non-product links
-                            if any(x in href.lower() for x in [
-                                "login", "signin", "help", "footer"
-                            ]):
-                                continue
-
-                            # ✅ Product patterns
-                            if any(x in href.lower() for x in [
-                                "voucher", "product", "gift", "dp/"
-                            ]):
-                                product_links.append(urljoin(cat, href))
-
-                        except:
+                        if not href:
                             continue
 
+                        full = urljoin(cat, href)
+
+                        parsed = urlparse(full)
+
+                        # SAME DOMAIN ONLY
+                        if parsed.netloc != base_domain:
+                            continue
+
+                        if any(x in full.lower() for x in [
+                            "product", "voucher", "gift"
+                        ]):
+                            product_links.append(full)
+
+                        # 🧠 LIMIT PRODUCTS
+                        if len(product_links) >= MAX_PRODUCTS:
+                            break
+
                 except Exception as e:
-                    print(f"⚠️ Category crawl failed: {e}")
-                    continue
+                    print(f"⚠️ Category error: {e}")
 
             browser.close()
 

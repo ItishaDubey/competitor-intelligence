@@ -1,5 +1,4 @@
-import requests
-from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 import re
 
 
@@ -7,38 +6,68 @@ class Extractor:
 
     def extract(self, site_map):
 
+        print("📦 Extracting product details...")
+
         products = []
 
-        for link in site_map.get("product_links", [])[:20]:  # limit for testing
-            try:
-                res = requests.get(link, headers={
-                    "User-Agent": "Mozilla/5.0"
-                }, timeout=15)
+        with sync_playwright() as p:
 
-                soup = BeautifulSoup(res.text, "html.parser")
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
 
-                title = soup.find("title")
-                name = title.text.strip() if title else "Unknown Product"
+            for link in site_map["product_links"]:
 
-                text = soup.get_text(" ", strip=True)
+                try:
+                    page.goto(link, timeout=60000)
+                    page.wait_for_timeout(2000)
 
-                price_match = re.search(r"(\$|₹)\s?\d+(\.\d+)?", text)
-                price = price_match.group() if price_match else "N/A"
+                    # -------------------------
+                    # NAME
+                    # -------------------------
+                    name = None
 
-                products.append({
-                    "name": name,
-                    "normalized_name": self.normalize(name),
-                    "price": price,
-                    "url": link,
-                    "category": "unknown"
-                })
+                    h1 = page.locator("h1").first
+                    if h1:
+                        name = h1.inner_text()
 
-            except Exception as e:
-                print(f"⚠️ Failed extracting {link}: {e}")
+                    # -------------------------
+                    # PRICE
+                    # -------------------------
+                    price = None
+
+                    price_text = page.locator("text=/₹|rs|inr/i").first
+                    if price_text:
+                        price = price_text.inner_text()
+
+                    # -------------------------
+                    # VARIANT BUTTONS
+                    # -------------------------
+                    variant_buttons = page.locator("button, span").all()
+
+                    for vb in variant_buttons:
+                        txt = vb.inner_text()
+                        match = re.search(r"\d+", txt)
+
+                        if match:
+                            products.append({
+                                "name": f"{name} {match.group(0)}",
+                                "price": match.group(0),
+                                "url": link
+                            })
+
+                    # fallback single product
+                    if name:
+                        products.append({
+                            "name": name,
+                            "price": price,
+                            "url": link
+                        })
+
+                except Exception as e:
+                    print(f"⚠️ Extract error: {e}")
+
+            browser.close()
 
         print(f"📦 Extracted {len(products)} products")
 
         return products
-
-    def normalize(self, name):
-        return re.sub(r"[^a-z0-9]", "_", name.lower())

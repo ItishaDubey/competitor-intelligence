@@ -1,142 +1,265 @@
+import os
 from datetime import datetime
 
 
-def format_price(price):
-    if price is None:
-        return "N/A"
-    return str(price)
+# =====================================================
+# HELPERS
+# =====================================================
+
+def safe(val):
+    if val is None:
+        return "-"
+    return val
 
 
-def generate_html(digest):
+def build_baseline_table(baseline_products, competitors):
+    """
+    Build comparison table:
+    Product | Variant | Competitor1 Price | Competitor2 Price
+    """
 
-    report_date = datetime.now().strftime('%B %d, %Y • %H:%M')
+    # Map competitor prices by signature + variant
+    competitor_maps = {}
 
-    html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-<title>Strategic Intelligence Report</title>
-<style>
-body {{
-    font-family: 'Segoe UI', Arial;
-    background:#f4f6f8;
-    padding:40px;
-}}
-
-.container {{ max-width:1200px; margin:auto; }}
-
-.header {{
-    background:#111;
-    color:#fff;
-    padding:30px;
-    border-radius:12px;
-    margin-bottom:30px;
-}}
-
-.card {{
-    background:#fff;
-    border-radius:10px;
-    padding:20px;
-    margin-bottom:20px;
-}}
-
-.section-title {{
-    font-weight:700;
-    margin-top:15px;
-}}
-
-.product-row {{
-    padding:8px 0;
-    border-bottom:1px solid #eee;
-}}
-
-.badge {{
-    background:#eee;
-    padding:3px 8px;
-    border-radius:6px;
-    margin-left:10px;
-}}
-</style>
-</head>
-<body>
-<div class="container">
-
-<div class="header">
-<h1>Strategic Intelligence Report</h1>
-<div>Generated: {report_date}</div>
-</div>
-"""
-
-    # -----------------------------
-    # BASELINE SECTION
-    # -----------------------------
-    baseline = digest.get("baseline", {})
-    html += f"""
-<div class="card">
-<h2>🏠 Baseline: {baseline.get("name","")}</h2>
-<div>{len(baseline.get("products", []))} baseline products tracked</div>
-</div>
-"""
-
-    # -----------------------------
-    # COMPETITOR SECTION
-    # -----------------------------
-    for comp in digest.get("competitors", []):
-
-        html += f"""
-<div class="card">
-<h2>🎯 {comp.get("name")}</h2>
-<div>Price Range: {comp.get("price_range",{}).get("min")} - {comp.get("price_range",{}).get("max")}</div>
-"""
-
-        # Insights
-        if comp.get("insights"):
-            html += f"""
-<div class="section-title">🧠 Strategic Insights</div>
-<div style="white-space:pre-wrap;">{comp.get("insights")}</div>
-"""
-
-        # New Products
-        if comp.get("new_products"):
-            html += "<div class='section-title'>🆕 New Products (24h)</div>"
-            for np in comp["new_products"]:
-                html += f"<div class='product-row'>{np.get('name')}</div>"
-
-        # Deleted Products
-        if comp.get("deleted_products"):
-            html += "<div class='section-title'>❌ Deleted Products</div>"
-            for dp in comp["deleted_products"]:
-                html += f"<div class='product-row'>{dp.get('name')}</div>"
-
-        # Missing vs baseline
-        if comp.get("missing"):
-            html += "<div class='section-title'>⚠️ Missing vs Baseline</div>"
-            for mp in comp["missing"][:10]:
-                html += f"<div class='product-row'>{mp.get('name')}</div>"
-
-        # Product Table
-        html += "<div class='section-title'>📦 Products</div>"
-
+    for comp in competitors:
+        cmap = {}
         for p in comp.get("products", []):
+            key = (
+                p.get("signature"),
+                p.get("variant_value")
+            )
+            cmap[key] = p.get("price")
+        competitor_maps[comp["name"]] = cmap
+
+    rows = ""
+
+    for bp in baseline_products:
+
+        row = f"""
+        <tr>
+            <td>{bp.get('name')}</td>
+            <td>{safe(bp.get('variant_value'))}</td>
+        """
+
+        for comp in competitors:
+            cmap = competitor_maps.get(comp["name"], {})
+            price = cmap.get(
+                (bp.get("signature"), bp.get("variant_value"))
+            )
+            row += f"<td>{safe(price)}</td>"
+
+        row += "</tr>"
+        rows += row
+
+    # Header
+    headers = "<th>Product</th><th>Variant</th>"
+    for comp in competitors:
+        headers += f"<th>{comp['name']} Price</th>"
+
+    table = f"""
+    <h2>📊 Pricing Comparison</h2>
+    <table class="compare">
+        <thead>
+            <tr>{headers}</tr>
+        </thead>
+        <tbody>
+            {rows}
+        </tbody>
+    </table>
+    """
+
+    return table
+
+
+def build_variant_section(competitors):
+
+    html = "<h2>🔼 Variant Expansion Insights</h2>"
+
+    for comp in competitors:
+
+        gaps = comp.get("diff", {}).get("variant_gaps", [])
+
+        html += f"<h3>{comp['name']}</h3>"
+
+        if not gaps:
+            html += "<p>No variant gaps detected.</p>"
+            continue
+
+        html += "<ul>"
+        for g in gaps:
             html += f"""
-<div class="product-row">
-<strong>{p.get('name')}</strong>
-<span class="badge">{format_price(p.get('price'))}</span><br>
-<a href="{p.get('url')}" target="_blank">{p.get('url')}</a>
-</div>
-"""
+            <li>
+            {g.get('product')} — Missing Variant:
+            <b>{safe(g.get('missing_variant'))}</b>
+            (Competitor Price: {safe(g.get('competitor_price'))})
+            </li>
+            """
+        html += "</ul>"
 
-        html += "</div>"
-
-    html += "</div></body></html>"
     return html
 
 
-def generate_report(digest_data, output_path="competitive_report.html"):
+def build_changes_section(changes):
 
-    html = generate_html(digest_data)
+    if not changes:
+        return ""
 
-    with open(output_path, "w", encoding="utf-8") as f:
+    html = "<h2>📈 Daily Changes</h2>"
+
+    def render_list(title, items):
+        if not items:
+            return f"<h4>{title}: 0</h4>"
+
+        block = f"<h4>{title}: {len(items)}</h4><ul>"
+        for p in items:
+            name = p.get("name") if isinstance(p, dict) else str(p)
+            block += f"<li>{name}</li>"
+        block += "</ul>"
+        return block
+
+    html += render_list("+ New SKUs Today", changes.get("new_skus"))
+    html += render_list("- Deleted SKUs", changes.get("deleted_skus"))
+    html += render_list("↓ Price Drops", changes.get("price_drops"))
+    html += render_list("↑ Variant Expansion", changes.get("variant_expansion"))
+
+    return html
+
+
+def build_competitor_sections(competitors):
+
+    html = ""
+
+    for comp in competitors:
+
+        diff = comp.get("diff", {})
+        insights = comp.get("insights", "")
+
+        price_range = diff.get("price_range", {})
+
+        html += f"""
+        <div class="card">
+            <h2>🎯 {comp['name']}</h2>
+
+            <p><b>Price Range:</b>
+            {safe(price_range.get('min'))}
+            -
+            {safe(price_range.get('max'))}</p>
+
+            <h3>🧠 Strategic Insights</h3>
+            <pre>{insights}</pre>
+        </div>
+        """
+
+    return html
+
+
+# =====================================================
+# MAIN REPORT GENERATOR
+# =====================================================
+
+def generate_report(digest):
+
+    baseline = digest.get("baseline", {})
+    competitors = digest.get("competitors", [])
+    changes = digest.get("changes", {})
+
+    baseline_products = baseline.get("products", [])
+
+    generated_time = digest.get("generated_at", datetime.now().isoformat())
+
+    # -------------------------------------------------
+    # BUILD SECTIONS
+    # -------------------------------------------------
+    baseline_table = build_baseline_table(
+        baseline_products,
+        competitors
+    )
+
+    variant_section = build_variant_section(competitors)
+
+    competitor_sections = build_competitor_sections(competitors)
+
+    change_section = build_changes_section(changes)
+
+    # -------------------------------------------------
+    # HTML TEMPLATE
+    # -------------------------------------------------
+    html = f"""
+    <html>
+    <head>
+    <style>
+
+    body {{
+        font-family: Arial;
+        background:#f5f6f8;
+        padding:40px;
+    }}
+
+    h1 {{
+        background:#111;
+        color:white;
+        padding:20px;
+        border-radius:12px;
+    }}
+
+    .card {{
+        background:white;
+        padding:20px;
+        margin-top:20px;
+        border-radius:12px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    }}
+
+    table.compare {{
+        width:100%;
+        border-collapse:collapse;
+        background:white;
+        margin-top:20px;
+    }}
+
+    table.compare th, table.compare td {{
+        border:1px solid #ddd;
+        padding:10px;
+        text-align:left;
+    }}
+
+    table.compare th {{
+        background:#fafafa;
+    }}
+
+    pre {{
+        white-space:pre-wrap;
+        font-size:14px;
+    }}
+
+    </style>
+    </head>
+
+    <body>
+
+    <h1>Strategic Intelligence Report</h1>
+    <p>Generated: {generated_time}</p>
+
+    <div class="card">
+        <h2>🏠 Baseline: {baseline.get("name")}</h2>
+        <p>{len(baseline_products)} baseline products tracked</p>
+    </div>
+
+    {baseline_table}
+
+    {variant_section}
+
+    {change_section}
+
+    {competitor_sections}
+
+    </body>
+    </html>
+    """
+
+    os.makedirs("reports", exist_ok=True)
+
+    with open("reports/competitive_report.html", "w") as f:
         f.write(html)
 
-    print(f"✅ HTML Report Generated: {output_path}")
+    print("✅ HTML Report Generated: reports/competitive_report.html")

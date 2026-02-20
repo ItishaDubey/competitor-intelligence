@@ -1,9 +1,36 @@
-class Matcher:
-    def compare(self, baseline, competitor):
+from rapidfuzz import fuzz
 
-        baseline_index = {
-            p["normalized_name"]: p for p in baseline
-        }
+
+class Matcher:
+
+    # ----------------------------------------------------
+    # Find Best Fuzzy Match
+    # ----------------------------------------------------
+    def _find_match(self, name, baseline_products):
+
+        best_match = None
+        best_score = 0
+
+        for bp in baseline_products:
+
+            score = fuzz.token_set_ratio(
+                name,
+                bp.get("normalized_name", "")
+            )
+
+            if score > best_score:
+                best_score = score
+                best_match = bp
+
+        if best_score > 80:
+            return best_match
+
+        return None
+
+    # ----------------------------------------------------
+    # Compare baseline vs competitor
+    # ----------------------------------------------------
+    def compare(self, baseline, competitor):
 
         matched = []
         missing = []
@@ -11,12 +38,14 @@ class Matcher:
         prices = []
 
         for cp in competitor:
+
             prices.append(cp.get("price"))
 
-            norm_name = cp.get("normalized_name")
+            norm_name = cp.get("normalized_name", "")
 
-            if norm_name in baseline_index:
-                bp = baseline_index[norm_name]
+            bp = self._find_match(norm_name, baseline)
+
+            if bp:
 
                 matched.append({
                     "name": cp.get("name"),
@@ -29,14 +58,14 @@ class Matcher:
                         "competitor_price": cp.get("price")
                     }
                 })
+
             else:
                 missing.append(cp)
 
         # -------- PRICE RANGE --------
-        numeric_prices = []
-        for p in prices:
-            if isinstance(p, (int, float)):
-                numeric_prices.append(p)
+        numeric_prices = [
+            p for p in prices if isinstance(p, (int, float))
+        ]
 
         price_range = {
             "min": min(numeric_prices) if numeric_prices else "N/A",
