@@ -1,80 +1,86 @@
-from rapidfuzz import fuzz
+from collections import defaultdict
 
 
-class Matcher:
+class ProductMatcher:
 
-    # ----------------------------------------------------
-    # Find Best Fuzzy Match
-    # ----------------------------------------------------
-    def _find_match(self, name, baseline_products):
-
-        best_match = None
-        best_score = 0
-
-        for bp in baseline_products:
-
-            score = fuzz.token_set_ratio(
-                name,
-                bp.get("normalized_name", "")
-            )
-
-            if score > best_score:
-                best_score = score
-                best_match = bp
-
-        if best_score > 80:
-            return best_match
-
-        return None
-
-    # ----------------------------------------------------
-    # Compare baseline vs competitor
-    # ----------------------------------------------------
-    def compare(self, baseline, competitor):
+    # =====================================================
+    # MATCH PRODUCTS USING SIGNATURE
+    # =====================================================
+    def match(self, baseline_products, competitor_products):
 
         matched = []
-        missing = []
+        missing_from_baseline = []     # ⭐ competitor SKUs baseline doesn't have
+        variant_gaps = []
 
-        prices = []
+        # -------------------------------------------------
+        # BUILD INDEXES BY SIGNATURE
+        # -------------------------------------------------
+        base_index = defaultdict(list)
+        comp_index = defaultdict(list)
 
-        for cp in competitor:
+        for bp in baseline_products:
+            sig = bp.get("signature")
+            if sig:
+                base_index[sig].append(bp)
 
-            prices.append(cp.get("price"))
+        for cp in competitor_products:
+            sig = cp.get("signature")
+            if sig:
+                comp_index[sig].append(cp)
 
-            norm_name = cp.get("normalized_name", "")
+        # -------------------------------------------------
+        # MATCH LOOP — BASELINE vs COMPETITOR
+        # -------------------------------------------------
+        for sig, base_items in base_index.items():
 
-            bp = self._find_match(norm_name, baseline)
+            comp_items = comp_index.get(sig, [])
 
-            if bp:
+            if not comp_items:
+                continue
 
-                matched.append({
-                    "name": cp.get("name"),
-                    "url": cp.get("url"),
-                    "price": cp.get("price"),
-                    "category": cp.get("category", "unknown"),
-                    "match": {
-                        "name": bp.get("name"),
-                        "baseline_price": bp.get("price"),
-                        "competitor_price": cp.get("price")
-                    }
-                })
+            base_variants = {
+                b.get("variant_value") for b in base_items
+            }
 
-            else:
-                missing.append(cp)
+            for cp in comp_items:
 
-        # -------- PRICE RANGE --------
-        numeric_prices = [
-            p for p in prices if isinstance(p, (int, float))
+                matched.append(cp)
+
+                if cp.get("variant_value") not in base_variants:
+
+                    variant_gaps.append({
+                        "product": cp.get("name"),
+                        "missing_variant": cp.get("variant_value"),
+                        "competitor_price": cp.get("price"),
+                        "url": cp.get("url")
+                    })
+
+        # -------------------------------------------------
+        # COMPETITOR PRODUCTS NOT IN BASELINE ⭐
+        # -------------------------------------------------
+        for sig, comp_items in comp_index.items():
+            if sig not in base_index:
+                missing_from_baseline.extend(comp_items)
+
+        # -------------------------------------------------
+        # PRICE RANGE
+        # -------------------------------------------------
+        prices = [
+            p.get("price")
+            for p in competitor_products
+            if isinstance(p.get("price"), (int, float))
         ]
 
-        price_range = {
-            "min": min(numeric_prices) if numeric_prices else "N/A",
-            "max": max(numeric_prices) if numeric_prices else "N/A"
-        }
+        price_range = {}
+        if prices:
+            price_range = {
+                "min": min(prices),
+                "max": max(prices)
+            }
 
         return {
             "matched": matched,
-            "missing": missing,
-            "raw_competitor_products": competitor,
+            "missing": missing_from_baseline,
+            "variant_gaps": variant_gaps,
             "price_range": price_range
         }

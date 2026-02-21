@@ -1,5 +1,4 @@
 import re
-from rapidfuzz import fuzz
 
 
 class ProductSignatureEngine:
@@ -12,6 +11,9 @@ class ProductSignatureEngine:
         ("jio", ["jio"]),
     ]
 
+    # =====================================================
+    # SINGLE SIGNATURE EXTRACTOR
+    # =====================================================
     def extract_signature(self, name: str):
 
         if not name:
@@ -19,10 +21,10 @@ class ProductSignatureEngine:
 
         text = name.lower()
 
-        # Remove store breadcrumbs
+        # remove store breadcrumbs
         text = re.sub(r"\|.*", "", text)
 
-        # Remove noise words
+        # remove noise words
         text = re.sub(
             r"(voucher|gift card|recharge code|e-gift|instant|digital)",
             "",
@@ -31,11 +33,30 @@ class ProductSignatureEngine:
 
         text = re.sub(r"[^a-z0-9 ]", "", text).strip()
 
-        # Rule-based brand detection
+        # rule-based brand detection
         for sig, keywords in self.BRAND_RULES:
             for k in keywords:
                 if k in text:
                     return sig
 
-        # fallback signature
         return text.replace(" ", "_")[:40]
+
+    # =====================================================
+    # ⭐ MISSING BUILD STAGE (THIS FIXES MATCHING + PRICES)
+    # =====================================================
+    def build(self, products):
+
+        if not products:
+            return []
+
+        enriched = []
+
+        for p in products:
+
+            name = p.get("name", "")
+
+            p["signature"] = self.extract_signature(name)
+
+            enriched.append(p)
+
+        return enriched

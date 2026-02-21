@@ -4,15 +4,9 @@ from backend.agent_core.product_signature_engine import ProductSignatureEngine
 
 class ProductNormalizer:
 
-    # ----------------------------------------------------
-    # INIT — attach Signature Engine
-    # ----------------------------------------------------
     def __init__(self):
         self.signature_engine = ProductSignatureEngine()
 
-    # ----------------------------------------------------
-    # Clean + Normalize Raw Extracted Products
-    # ----------------------------------------------------
     def normalize(self, raw_products):
 
         normalized = []
@@ -23,9 +17,6 @@ class ProductNormalizer:
             url = p.get("url")
             price = p.get("price")
 
-            # ---------------------------
-            # HARD FILTERS (kills garbage)
-            # ---------------------------
             if not name:
                 continue
 
@@ -40,20 +31,15 @@ class ProductNormalizer:
             if any(b in lowered for b in blacklist):
                 continue
 
-            # ---------------------------
-            # Normalize Name
-            # ---------------------------
             normalized_name = self._normalize_name(name)
 
-            # ---------------------------
-            # ⭐ PRODUCT SIGNATURE
-            # ---------------------------
             signature = self.signature_engine.extract_signature(name)
 
-            # ---------------------------
-            # Detect Variant Value (₹500 etc)
-            # ---------------------------
-            variant_value = self._extract_variant(name)
+            # ⭐ CRITICAL FIX — USE INGESTED VARIANT FIRST
+            variant_value = (
+                p.get("variant")
+                or self._extract_variant(name, price)
+            )
 
             normalized.append({
                 "name": name,
@@ -67,46 +53,36 @@ class ProductNormalizer:
 
         return normalized
 
-    # ----------------------------------------------------
-    # Normalize Product Name  ⭐ FIXED INDENTATION
-    # ----------------------------------------------------
     def _normalize_name(self, name):
 
         name = name.lower()
-
-        # ⭐ REMOVE KSTORE BRAND PREFIX
         name = re.sub(r"the official .*?\|", "", name)
-
-        # remove currency values
+        name = re.sub(r"(e gift|egift|gift card|voucher|instant voucher)", "", name)
         name = re.sub(r"\₹?\$?\d+", "", name)
-
-        # remove punctuation
         name = re.sub(r"[^a-zA-Z0-9 ]", "", name)
+        name = " ".join(name.split())
 
-        # collapse spaces
-        name = re.sub(r"\s+", " ", name)
+        return name.strip()
 
-        name = name.strip()
+    def _extract_variant(self, name, price=None):
 
-        return name
-
-    # ----------------------------------------------------
-    # Extract Variant Value (50 / 100 / 500 etc)
-    # ----------------------------------------------------
-    def _extract_variant(self, name):
-
-        match = re.search(r"\₹?(\d+)", name)
+        match = re.search(r"\₹?(\d{2,5})", str(name))
         if match:
             try:
                 return int(match.group(1))
             except:
-                return None
+                pass
+
+        if price:
+            try:
+                val = int(float(price))
+                if val > 10:
+                    return val
+            except:
+                pass
 
         return None
 
-    # ----------------------------------------------------
-    # Clean Price Field
-    # ----------------------------------------------------
     def _clean_price(self, price):
 
         if price is None:

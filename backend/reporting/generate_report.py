@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from backend.agent_core.executive_insights_v2 import ExecutiveInsightEngineV2
 
 
 # =====================================================
@@ -12,27 +13,43 @@ def safe(val):
     return val
 
 
-def build_baseline_table(baseline_products, competitors):
-    """
-    Build comparison table:
-    Product | Variant | Competitor1 Price | Competitor2 Price
-    """
+# =====================================================
+# BASELINE TABLE (PRICING MATRIX)
+# =====================================================
 
-    # Map competitor prices by signature + variant
+def build_baseline_table(baseline_products, competitors):
+
     competitor_maps = {}
 
+    # -------------------------------------------------
+    # BUILD COMPETITOR PRICE MAPS
+    # -------------------------------------------------
     for comp in competitors:
+
         cmap = {}
+
         for p in comp.get("products", []):
+
             key = (
                 p.get("signature"),
                 p.get("variant_value")
             )
+
+            # PRIMARY MATCH
             cmap[key] = p.get("price")
+
+            # ⭐ SAFE FALLBACK MATCH (DO NOT OVERWRITE)
+            fallback_key = (p.get("signature"), None)
+            if fallback_key not in cmap:
+                cmap[fallback_key] = p.get("price")
+
         competitor_maps[comp["name"]] = cmap
 
     rows = ""
 
+    # -------------------------------------------------
+    # BUILD ROWS
+    # -------------------------------------------------
     for bp in baseline_products:
 
         row = f"""
@@ -42,16 +59,23 @@ def build_baseline_table(baseline_products, competitors):
         """
 
         for comp in competitors:
+
             cmap = competitor_maps.get(comp["name"], {})
+
+            # TRY EXACT MATCH
             price = cmap.get(
                 (bp.get("signature"), bp.get("variant_value"))
             )
+
+            # ⭐ FALLBACK IF VARIANT STRUCTURE DIFFERS
+            if price is None:
+                price = cmap.get((bp.get("signature"), None))
+
             row += f"<td>{safe(price)}</td>"
 
         row += "</tr>"
         rows += row
 
-    # Header
     headers = "<th>Product</th><th>Variant</th>"
     for comp in competitors:
         headers += f"<th>{comp['name']} Price</th>"
@@ -71,6 +95,10 @@ def build_baseline_table(baseline_products, competitors):
     return table
 
 
+# =====================================================
+# VARIANT GAP SECTION
+# =====================================================
+
 def build_variant_section(competitors):
 
     html = "<h2>🔼 Variant Expansion Insights</h2>"
@@ -86,6 +114,7 @@ def build_variant_section(competitors):
             continue
 
         html += "<ul>"
+
         for g in gaps:
             html += f"""
             <li>
@@ -94,10 +123,15 @@ def build_variant_section(competitors):
             (Competitor Price: {safe(g.get('competitor_price'))})
             </li>
             """
+
         html += "</ul>"
 
     return html
 
+
+# =====================================================
+# DAILY CHANGES
+# =====================================================
 
 def build_changes_section(changes):
 
@@ -125,6 +159,10 @@ def build_changes_section(changes):
     return html
 
 
+# =====================================================
+# COMPETITOR INSIGHT CARDS
+# =====================================================
+
 def build_competitor_sections(competitors):
 
     html = ""
@@ -132,7 +170,13 @@ def build_competitor_sections(competitors):
     for comp in competitors:
 
         diff = comp.get("diff", {})
-        insights = comp.get("insights", "")
+
+        # ⭐ FIXED INSIGHT RENDERING
+        insight_obj = comp.get("insights", {})
+        if isinstance(insight_obj, dict):
+            insights = "\n".join(insight_obj.get("insights", []))
+        else:
+            insights = insight_obj
 
         price_range = diff.get("price_range", {})
 
@@ -165,10 +209,31 @@ def generate_report(digest):
 
     baseline_products = baseline.get("products", [])
 
-    generated_time = digest.get("generated_at", datetime.now().isoformat())
+    # =====================================================
+    # ⭐ EXECUTIVE INSIGHT ENGINE V2
+    # =====================================================
+    insight_engine = ExecutiveInsightEngineV2()
+
+    for comp in competitors:
+
+        comp_products = comp.get("products", [])
+
+        try:
+            comp["insights"] = insight_engine.generate(
+                baseline_products,
+                comp_products,
+                comp.get("name")
+            )
+        except Exception as e:
+            print("⚠️ Insight engine failed:", e)
+
+    generated_time = digest.get(
+        "generated_at",
+        datetime.now().isoformat()
+    )
 
     # -------------------------------------------------
-    # BUILD SECTIONS
+    # BUILD HTML SECTIONS
     # -------------------------------------------------
     baseline_table = build_baseline_table(
         baseline_products,
@@ -177,9 +242,9 @@ def generate_report(digest):
 
     variant_section = build_variant_section(competitors)
 
-    competitor_sections = build_competitor_sections(competitors)
-
     change_section = build_changes_section(changes)
+
+    competitor_sections = build_competitor_sections(competitors)
 
     # -------------------------------------------------
     # HTML TEMPLATE
@@ -246,11 +311,8 @@ def generate_report(digest):
     </div>
 
     {baseline_table}
-
     {variant_section}
-
     {change_section}
-
     {competitor_sections}
 
     </body>

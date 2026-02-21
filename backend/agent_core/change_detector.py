@@ -40,52 +40,67 @@ class ChangeDetector:
     # ---------------------------------------------------
     def _compare_products(self, today, yesterday):
 
-        today_map = {p["normalized_name"]: p for p in today}
-        y_map = {p["normalized_name"]: p for p in yesterday}
+        # ⭐ SWITCH TO SIGNATURE BASED KEYS
+        today_map = {
+            (p.get("signature"), p.get("variant_value")): p
+            for p in today
+        }
+
+        y_map = {
+            (p.get("signature"), p.get("variant_value")): p
+            for p in yesterday
+        }
 
         new_skus = []
         deleted_skus = []
         price_drops = []
         variant_expansion = []
 
-        # NEW SKUs
+        # ---------------- NEW SKUs ----------------
         for k, p in today_map.items():
             if k not in y_map:
-                new_skus.append(p["name"])
+                new_skus.append(p.get("name"))
 
-        # DELETED SKUs
+        # ---------------- DELETED SKUs ----------------
         for k, p in y_map.items():
             if k not in today_map:
-                deleted_skus.append(p["name"])
+                deleted_skus.append(p.get("name"))
 
-        # PRICE CHANGES
+        # ---------------- PRICE CHANGES ----------------
         for k, p in today_map.items():
+
             if k in y_map:
 
                 old_price = y_map[k].get("price")
                 new_price = p.get("price")
 
-                if old_price and new_price and new_price < old_price:
-                    price_drops.append(p["name"])
+                try:
+                    if old_price and new_price:
+                        if float(new_price) < float(old_price):
+                            price_drops.append(p.get("name"))
+                except:
+                    pass
 
-        # VARIANT EXPANSION
+        # ---------------- VARIANT EXPANSION ----------------
         today_variants = {}
         y_variants = {}
 
         for p in today:
-            today_variants.setdefault(p["normalized_name"], set()).add(
-                p.get("variant_value")
-            )
+            today_variants.setdefault(
+                p.get("signature"),
+                set()
+            ).add(p.get("variant_value"))
 
         for p in yesterday:
-            y_variants.setdefault(p["normalized_name"], set()).add(
-                p.get("variant_value")
-            )
+            y_variants.setdefault(
+                p.get("signature"),
+                set()
+            ).add(p.get("variant_value"))
 
-        for pname in today_variants:
-            if pname in y_variants:
-                if len(today_variants[pname]) > len(y_variants[pname]):
-                    variant_expansion.append(pname)
+        for sig in today_variants:
+            if sig in y_variants:
+                if len(today_variants[sig]) > len(y_variants[sig]):
+                    variant_expansion.append(sig)
 
         return {
             "new_skus": new_skus,

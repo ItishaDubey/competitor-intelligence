@@ -19,44 +19,83 @@ class Extractor:
 
                 try:
                     page.goto(link, timeout=60000)
-                    page.wait_for_timeout(2000)
+                    page.wait_for_timeout(2500)
 
-                    # -------------------------
-                    # NAME
-                    # -------------------------
+                    # -------------------------------------------------
+                    # PRODUCT NAME (STRICT)
+                    # -------------------------------------------------
                     name = None
 
                     h1 = page.locator("h1").first
-                    if h1:
-                        name = h1.inner_text()
 
-                    # -------------------------
-                    # PRICE
-                    # -------------------------
+                    if h1.count() > 0:
+                        name = h1.inner_text().strip()
+
+                    if not name:
+                        continue
+
+                    # -------------------------------------------------
+                    # VARIANT / DENOMINATION DETECTION ⭐
+                    # Only look inside product container
+                    # -------------------------------------------------
+                    variant_values = set()
+
+                    variant_nodes = page.locator(
+                        "button:has-text('₹'), span:has-text('₹'), div:has-text('₹')"
+                    ).all()
+
+                    for node in variant_nodes:
+
+                        try:
+                            txt = node.inner_text()
+
+                            match = re.search(r"\₹?\s?(\d{2,5})", txt)
+
+                            if match:
+                                val = int(match.group(1))
+
+                                # avoid crazy numbers like 999999
+                                if 10 <= val <= 50000:
+                                    variant_values.add(val)
+
+                        except:
+                            pass
+
+                    # -------------------------------------------------
+                    # PRICE EXTRACTION ⭐
+                    # Try strong selectors first
+                    # -------------------------------------------------
                     price = None
 
-                    price_text = page.locator("text=/₹|rs|inr/i").first
-                    if price_text:
-                        price = price_text.inner_text()
+                    price_locators = [
+                        "[class*=price]",
+                        "[class*=amount]",
+                        "[class*=value]"
+                    ]
 
-                    # -------------------------
-                    # VARIANT BUTTONS
-                    # -------------------------
-                    variant_buttons = page.locator("button, span").all()
+                    for sel in price_locators:
+                        el = page.locator(sel).first
+                        if el.count() > 0:
+                            txt = el.inner_text()
+                            m = re.search(r"\₹?\s?([\d,]+)", txt)
+                            if m:
+                                price = m.group(1)
+                                break
 
-                    for vb in variant_buttons:
-                        txt = vb.inner_text()
-                        match = re.search(r"\d+", txt)
+                    # -------------------------------------------------
+                    # BUILD PRODUCTS
+                    # -------------------------------------------------
+                    if variant_values:
 
-                        if match:
+                        for v in variant_values:
+
                             products.append({
-                                "name": f"{name} {match.group(0)}",
-                                "price": match.group(0),
+                                "name": f"{name} {v}",
+                                "price": v,       # denomination = price
                                 "url": link
                             })
 
-                    # fallback single product
-                    if name:
+                    else:
                         products.append({
                             "name": name,
                             "price": price,

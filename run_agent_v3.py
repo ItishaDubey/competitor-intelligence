@@ -8,8 +8,9 @@ from datetime import datetime
 from backend.agent_core.navigator_v3 import Navigator
 from backend.agent_core.extractor import Extractor
 from backend.agent_core.baseline_engine import BaselineEngine
-from backend.agent_core.matcher import Matcher
+from backend.agent_core.matcher import ProductMatcher as Matcher
 from backend.agent_core.intelligence_engine import IntelligenceEngine
+from backend.agent_core.executive_insights_v2 import ExecutiveInsightEngineV2
 
 # ---------------------------------------------------------
 # DATA PIPELINE ENGINES
@@ -40,6 +41,7 @@ class CIAgentV3:
     def __init__(self, config):
 
         self.config = config
+        self.signature_engine = ProductSignatureEngine()
 
         # -----------------------------
         # Core Engines
@@ -106,7 +108,7 @@ class CIAgentV3:
         # -------------------------------------------------
         if not raw_products:
 
-            print("⚠️ No API products found — crawl disabled for stability")
+            print("⚠️ No API products found — crawl fallback")
 
             try:
                 site_map = self.navigator.discover(source["url"])
@@ -115,10 +117,19 @@ class CIAgentV3:
                 print(f"❌ Navigator failed: {e}")
 
         # -------------------------------------------------
+        #  4️⃣ DOM FALLBACK (ONLY IF ZERO PRODUCTS FOUND)
+        # -------------------------------------------------
+        if not raw_products:
+            print("⚠️ No products detected — activating DOM fallback")
+            raw_products = self.ingestion.dom_price_fallback(source["url"])
+
+        # -------------------------------------------------
         # Normalize Products
         # -------------------------------------------------
         normalized = self.normalizer.normalize(raw_products)
-
+        # ⭐ ADD SIGNATURES (THIS WAS MISSING)
+        normalized = self.signature_engine.build(normalized)
+        
         print(f"📦 Normalized products: {len(normalized)}")
 
         return normalized
@@ -210,7 +221,6 @@ class CIAgentV3:
         with open("intelligence_data/report_latest.json", "w") as f:
             json.dump(digest_payload, f, indent=2)
 
-        # Save history snapshot
         try:
             self.history.save_today(digest_payload)
         except Exception as e:

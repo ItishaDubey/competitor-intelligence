@@ -20,18 +20,22 @@ class ProductSourceResolver:
                 try:
                     ct = response.headers.get("content-type", "")
 
-                    if "application/json" in ct:
+                    if "application/json" not in ct:
+                        return
 
-                        data = response.json()
+                    data = response.json()
 
-                        # ⭐ Only keep large payloads (likely products)
-                        if isinstance(data, (list, dict)):
-                            text = json.dumps(data)
+                    # ⭐ STRICT FILTER — ONLY PRODUCT DATA
+                    text = json.dumps(data).lower()
 
-                            if any(x in text.lower() for x in [
-                                "price", "variant", "product", "denomination"
-                            ]):
-                                payloads.append(data)
+                    if any(x in text for x in [
+                        "denomination",
+                        "variants",
+                        "sellingprice",
+                        "productname",
+                        "voucher"
+                    ]):
+                        payloads.append(data)
 
                 except:
                     pass
@@ -39,7 +43,9 @@ class ProductSourceResolver:
             page.on("response", handle_response)
 
             page.goto(url, timeout=60000)
-            page.wait_for_timeout(6000)
+
+            # ⭐ WAIT LONGER — APIs load async
+            page.wait_for_timeout(8000)
 
             browser.close()
 

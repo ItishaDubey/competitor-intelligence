@@ -1,25 +1,38 @@
 from backend.agent_core.navigator_v3 import Navigator
 from backend.agent_core.extractor import Extractor
 from backend.agent_core.baseline_engine import BaselineEngine
-from backend.agent_core.matcher import Matcher
+from backend.agent_core.matcher import ProductMatcher
 from backend.agent_core.intelligence_engine import IntelligenceEngine
 from backend.agent_core.history_engine import HistoryEngine
+from backend.agent_core.change_detector import ChangeDetector
 from backend.reporting.generate_report import generate_report
 
 
 class CIAgentOrchestrator:
+
     def __init__(self, config):
+
         self.config = config
+
         self.navigator = Navigator()
         self.extractor = Extractor()
         self.baseline_engine = BaselineEngine()
-        self.matcher = Matcher()
-        self.intelligence = IntelligenceEngine()
-        self.history = HistoryEngine()
 
+        # ⭐ CORRECT MATCHER
+        self.matcher = ProductMatcher()
+
+        self.intelligence = IntelligenceEngine()
+
+        self.history = HistoryEngine()
+        self.change_detector = ChangeDetector()
+
+    # =====================================================
+    # RUN AGENT
+    # =====================================================
     def run(self):
 
         print("🔎 Loading baseline...")
+
         baseline_url = self.config["baseline"]["url"]
 
         baseline_products = self.baseline_engine.load_or_build(
@@ -34,18 +47,21 @@ class CIAgentOrchestrator:
 
         print("🚀 Processing competitors...")
 
-        # -----------------------------
+        # --------------------------------------------------
         # PROCESS COMPETITORS
-        # -----------------------------
+        # --------------------------------------------------
         for competitor in self.config["competitors"]:
+
             print(f"➡️ Crawling: {competitor['name']}")
 
             site_map = self.navigator.discover(competitor["url"])
             competitor_products = self.extractor.extract(site_map)
 
-            print(f"📦 {competitor['name']} products extracted: {len(competitor_products)}")
+            print(
+                f"📦 {competitor['name']} products extracted: {len(competitor_products)}"
+            )
 
-            diff = self.matcher.compare(
+            diff = self.matcher.match(
                 baseline_products,
                 competitor_products
             )
@@ -56,25 +72,16 @@ class CIAgentOrchestrator:
                 competitor["name"]
             )
 
-            # 🔥 Detect history changes
-            new_products, deleted_products = self.history.detect_changes(
-                competitor["name"],
-                competitor_products
-            )
-
             all_results.append({
-                "competitor": competitor["name"],
+                "name": competitor["name"],
+                "products": competitor_products,
                 "diff": diff,
-                "insights": insights,
-                "raw_products": competitor_products,
-                "new_products": new_products,
-                "deleted_products": deleted_products,
-                "price_range": diff.get("price_range", {})
+                "insights": insights
             })
 
-        # -----------------------------
+        # --------------------------------------------------
         # BUILD REPORT PAYLOAD
-        # -----------------------------
+        # --------------------------------------------------
         print("📊 Generating report...")
 
         digest_payload = {
@@ -82,26 +89,20 @@ class CIAgentOrchestrator:
                 "name": self.config["baseline"]["name"],
                 "products": baseline_products
             },
-            "competitors": []
+            "competitors": all_results
         }
 
-        for r in all_results:
+        # ⭐ HISTORY + CHANGE DETECTION
+        yesterday = self.history.load_yesterday()
 
-            products_to_show = r["diff"].get("matched", [])
+        changes = self.change_detector.detect(
+            digest_payload,
+            yesterday
+        )
 
-            # fallback if baseline matching weak
-            if not products_to_show:
-                products_to_show = r.get("raw_products", [])
+        digest_payload["changes"] = changes
 
-            digest_payload["competitors"].append({
-                "name": r["competitor"],
-                "products": products_to_show,
-                "missing": r["diff"].get("missing", []),
-                "new_products": r.get("new_products", []),
-                "deleted_products": r.get("deleted_products", []),
-                "price_range": r.get("price_range", {}),
-                "insights": r.get("insights", "")
-            })
+        self.history.save_today(digest_payload)
 
         generate_report(digest_payload)
 

@@ -6,11 +6,12 @@ load_dotenv()
 
 
 class IntelligenceEngine:
+
     def __init__(self):
+
         self.api_key = os.getenv("OPENAI_API_KEY")
         self.client = None
 
-        # If key exists, create client
         if self.api_key:
             try:
                 self.client = OpenAI(api_key=self.api_key)
@@ -21,6 +22,9 @@ class IntelligenceEngine:
             print("⚠️ OPENAI_API_KEY not found — running in TEST MODE.")
 
 
+    # =====================================================
+    # STRATEGIC INSIGHT GENERATOR
+    # =====================================================
     def generate(self, baseline, diff, competitor_name):
 
         matched = diff.get("matched", [])
@@ -31,11 +35,8 @@ You are a senior competitive pricing strategist.
 
 Competitor: {competitor_name}
 
-Matched Products:
-{matched}
-
-Missing Products:
-{missing}
+Matched Products Count: {len(matched)}
+Missing Products Count: {len(missing)}
 
 Provide:
 1. Pricing risks
@@ -43,9 +44,9 @@ Provide:
 3. Recommendations to increase sales
 """
 
-        # -----------------------------------
-        # REAL AI MODE (if API works)
-        # -----------------------------------
+        # ------------------------------------------------
+        # REAL AI MODE
+        # ------------------------------------------------
         if self.client:
             try:
                 response = self.client.responses.create(
@@ -57,9 +58,9 @@ Provide:
             except Exception as e:
                 print(f"⚠️ OpenAI call failed, switching to TEST MODE: {e}")
 
-        # -----------------------------------
-        # TEST MODE (Offline fallback)
-        # -----------------------------------
+        # ------------------------------------------------
+        # TEST MODE (OFFLINE FALLBACK)
+        # ------------------------------------------------
         return f"""
 [TEST INSIGHTS — OFFLINE MODE]
 
