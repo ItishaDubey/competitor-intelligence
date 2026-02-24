@@ -1,0 +1,941 @@
+
+============================================================
+DIAGNOSING: Woohoo
+============================================================
+
+  PAGE 2: 30 products
+  FULL product[0]:
+{
+  "entity_id": 823,
+  "entity_type_id": 4,
+  "attribute_set_id": 9,
+  "type_id": "simple",
+  "sku": "EGCGBTCQ001",
+  "has_options": 1,
+  "required_options": 0,
+  "created_at": "2019-07-08 11:07:21",
+  "updated_at": "2026-01-22 05:32:41",
+  "cat_index_position": 36,
+  "status": 1,
+  "visibility": 4,
+  "iin": "600437",
+  "add_to_wallet": 1,
+  "product_name": "TATA CliQ Fashion E-Gift (Instant Voucher)",
+  "url_key": "tata-cliq",
+  "small_image": "/t/a/tata_cliq_fashio-1120x700_2107-gc-pl_logo.png",
+  "brand": "411",
+  "mobile": "/t/a/tata_cliq_fashio-1120x700_2107-gc-pl_logo.png",
+  "sellable_in_market": 0,
+  "market_display_name": null,
+  "couponcode_desc": null,
+  "card_program_group": "TUL SCLP B2C eGift Cards",
+  "min_custom_price": "50",
+  "max_custom_price": "10000",
+  "category_ids": [
+    2,
+    3,
+    12,
+    14,
+    25,
+    26,
+    34,
+    37,
+    49,
+    50,
+    51,
+    52,
+    54,
+    57,
+    74,
+    75,
+    91,
+    102,
+    107,
+    109,
+    125,
+    133,
+    135,
+    140,
+    143,
+    170,
+    214,
+    263,
+    264,
+    266,
+    267,
+    269,
+    270,
+    274,
+    343,
+    349,
+    353,
+    436,
+    440,
+    441,
+    443,
+    467,
+    496,
+    570,
+    589,
+    597,
+    601,
+    605,
+    622,
+    623,
+    625,
+    628,
+    629,
+    630,
+    631,
+    646,
+    672,
+    673,
+    675,
+    677,
+    678,
+    680,
+    701,
+    703,
+    704,
+    709,
+    710,
+    711,
+    712,
+    719,
+    722,
+    735,
+    736,
+    751,
+    752,
+    766,
+    770,
+    774,
+    778,
+    779,
+    780,
+    785,
+    786,
+    879,
+    880,
+    890,
+    903,
+    904,
+    908,
+    909,
+    910,
+    911,
+    916,
+    917
+  ],
+  "brand_logo": {
+    "small": "https://static.woohoo.in/media/brands_logo/68x68-100053625.jpg",
+    "large": "https://static.woohoo.in/media/brands_logo/68x68-100053625.jpg"
+  },
+  "id": [
+    2,
+    3,
+    12,
+    14,
+    25,
+    26,
+    34,
+    37,
+    49,
+    50,
+    51,
+    52,
+    54,
+    57,
+    74,
+    75,
+    91,
+    102,
+    107,
+    109,
+    125,
+    133,
+    135,
+    140,
+    143,
+    170,
+    214,
+    263,
+    264,
+    266,
+    267,
+    269,
+    270,
+    274,
+    343,
+    349,
+    353,
+    436,
+    440,
+    441,
+    443,
+    467,
+    496,
+    570,
+    589,
+    597,
+    601,
+    605,
+    622,
+    623,
+    625,
+    628,
+    629,
+    630,
+    631,
+    646,
+    672,
+    673,
+    675,
+    677,
+    678,
+    680,
+    701,
+    703,
+    704,
+    709,
+    710,
+    711,
+    712,
+    719,
+    722,
+    735,
+    736,
+    751,
+    752,
+    766,
+    770,
+    774,
+    778,
+    779,
+    780,
+    785,
+    786,
+    879,
+    880,
+    890,
+    903,
+    904,
+    908,
+    909,
+    910,
+    911,
+    916,
+    917
+  ],
+  "name": "TATA CliQ Fashion E-Gift (Instant Voucher)",
+  "product_id": 823,
+  "discounts": [
+    {
+      "startDate": "2024-12-31T18:30:00+0000",
+      "endDate": "2026-03-31T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 11,
+        "desc": "Flat 11% OFF | Applicable on payment via UPI, Debit Card, Credi
+
+  PAGE 3: 30 products
+  FULL product[0]:
+{
+  "entity_id": 2148,
+  "entity_type_id": 4,
+  "attribute_set_id": 9,
+  "type_id": "simple",
+  "sku": "EGCGBWRNGLR001",
+  "has_options": 1,
+  "required_options": 0,
+  "created_at": "2023-10-05 06:08:55",
+  "updated_at": "2025-09-25 09:38:49",
+  "cat_index_position": 66,
+  "status": 1,
+  "visibility": 4,
+  "iin": "100849",
+  "add_to_wallet": 1,
+  "product_name": "Wrangler E-Gift (Instant Voucher)",
+  "url_key": "wrangler-e-gift-instant-voucher",
+  "small_image": "/3/1/312x200_wr.png",
+  "brand": "708",
+  "mobile": "/3/1/312x200_wr.png",
+  "sellable_in_market": 0,
+  "market_display_name": null,
+  "couponcode_desc": null,
+  "card_program_group": "Wrangler egift cards",
+  "min_custom_price": "500",
+  "max_custom_price": "5000",
+  "category_ids": [
+    2,
+    3,
+    12,
+    14,
+    25,
+    75,
+    91,
+    102,
+    125,
+    266,
+    267,
+    270
+  ],
+  "brand_logo": {
+    "small": "https://static.woohoo.in/media/brands_logo/68x68WR.jpg",
+    "large": "https://static.woohoo.in/media/brands_logo/68x68WR.jpg"
+  },
+  "id": [
+    2,
+    3,
+    12,
+    14,
+    25,
+    75,
+    91,
+    102,
+    125,
+    266,
+    267,
+    270
+  ],
+  "name": "Wrangler E-Gift (Instant Voucher)",
+  "product_id": 2148,
+  "discounts": [
+    {
+      "startDate": "2023-10-11T18:30:00+0000",
+      "endDate": "2030-12-31T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 8,
+        "desc": "Flat 8% OFF | Applicable on payment via UPI"
+      },
+      "coupon": {
+        "code": "WR8"
+      },
+      "priority": 1
+    },
+    {
+      "startDate": "2023-10-11T18:30:00+0000",
+      "endDate": "2030-12-31T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 7,
+        "desc": "Flat 7% OFF | Applicable on payment via Credit Card, Debit Card, UPI & Net Banking"
+      },
+      "coupon": {
+        "code": "WR7"
+      },
+      "priority": 2
+    }
+  ],
+  "cashbacks": [],
+  "redemption_rules": [
+    {
+      "type": "percentage",
+      "amount": 7.000000000000001,
+      "currency": "WoohooCoins"
+    }
+  ],
+  "min_custom_value": "500",
+  "max_custom_value": "5000",
+  "images": {
+    "small_image": "https://static.woohoo.in/media/catalog/product/3/1/312x200_wr.png",
+    "strip_image": "https://static.woohoo.in/media/catalog/product/3/1/312x200_wr.png",
+    "card_image": {
+      "logo": {
+        "small": "https://static.woohoo.in/media/cardimage/68x68WR.jpg",
+        "large": "https://static.woohoo.in/media/cardimage/68x68WR.jpg"
+      },
+      "card": {
+        "large": "https://static.woohoo.in/media/cardimage/312x200_WR.png",
+        "small": "https://static.woohoo.in/media/cardimage/312x200_WR.png"
+      }
+    }
+  },
+  "_links": {
+    "self": {
+      "href": "/product/2148"
+    },
+    "next": {
+      "href": "/product/2236"
+    },
+    "url": {
+      "href": "wrangler-e-gift-instant-voucher"
+    }
+  }
+}
+
+  PAGE 4: 30 products
+  FULL product[0]:
+{
+  "entity_id": 24,
+  "entity_type_id": 4,
+  "attribute_set_id": 9,
+  "type_id": "simple",
+  "sku": "MGVGBPLF001",
+  "has_options": 1,
+  "required_options": 1,
+  "created_at": "2015-09-02 09:31:07",
+  "updated_at": "2025-03-03 13:58:06",
+  "cat_index_position": 95,
+  "status": 1,
+  "visibility": 4,
+  "iin": "100021",
+  "add_to_wallet": 1,
+  "product_name": "Planet fashion E-Gift (Instant Voucher)",
+  "url_key": "planet-fashion-e-gift-card",
+  "small_image": "/p/l/planetfashion200x120.jpg",
+  "brand": "26",
+  "mobile": "/3/1/312x200px-wplanetfashion.png",
+  "sellable_in_market": 0,
+  "market_display_name": "Planet Fashion",
+  "couponcode_desc": null,
+  "card_program_group": "QC-MGC-PF-VAR",
+  "min_custom_price": "500",
+  "max_custom_price": "50000",
+  "category_ids": [
+    2,
+    3,
+    4,
+    12,
+    14,
+    25,
+    26,
+    44,
+    45,
+    46,
+    51,
+    55,
+    56,
+    59,
+    61,
+    79,
+    81,
+    84,
+    85,
+    86,
+    87,
+    89,
+    91,
+    102,
+    103,
+    104,
+    110,
+    114,
+    115,
+    117,
+    119,
+    121,
+    125,
+    129,
+    140,
+    156,
+    157,
+    158,
+    159,
+    168,
+    175,
+    180,
+    182,
+    183,
+    196,
+    200,
+    203,
+    225,
+    228,
+    239,
+    266,
+    267,
+    270,
+    275,
+    276,
+    280,
+    283,
+    285,
+    290,
+    340,
+    375,
+    376,
+    436,
+    440,
+    441,
+    443,
+    458,
+    459,
+    467,
+    622,
+    623,
+    666,
+    667,
+    921
+  ],
+  "brand_logo": {
+    "small": "https://static.woohoo.in/media/brands_logo/26_logo.png",
+    "large": "https://static.woohoo.in/media/brands_logo/26_logo.png"
+  },
+  "id": [
+    2,
+    3,
+    4,
+    12,
+    14,
+    25,
+    26,
+    44,
+    45,
+    46,
+    51,
+    55,
+    56,
+    59,
+    61,
+    79,
+    81,
+    84,
+    85,
+    86,
+    87,
+    89,
+    91,
+    102,
+    103,
+    104,
+    110,
+    114,
+    115,
+    117,
+    119,
+    121,
+    125,
+    129,
+    140,
+    156,
+    157,
+    158,
+    159,
+    168,
+    175,
+    180,
+    182,
+    183,
+    196,
+    200,
+    203,
+    225,
+    228,
+    239,
+    266,
+    267,
+    270,
+    275,
+    276,
+    280,
+    283,
+    285,
+    290,
+    340,
+    375,
+    376,
+    436,
+    440,
+    441,
+    443,
+    458,
+    459,
+    467,
+    622,
+    623,
+    666,
+    667,
+    921
+  ],
+  "name": "Planet fashion E-Gift (Instant Voucher)",
+  "product_id": 24,
+  "discounts": [
+    {
+      "startDate": "2025-11-20T18:30:00+0000",
+      "endDate": "2026-11-30T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 3,
+        "desc": "Flat 3% OFF | Applicable on payment via UPI"
+      },
+      "coupon": {
+        "code": "ABF3"
+      },
+      "priority": 1
+    }
+  ],
+  "cashbacks": [],
+  "redemption_rules": [
+    {
+      "type": "percentage",
+      "amount": 2,
+      "currency": "WoohooCoins"
+    }
+  ],
+  "min_custom_value": "500",
+  "max_custom_value": "50000",
+  "images": {
+    "small_image": "https://static.woohoo.in/media/catalog/product/p/l/planetfashion200x120.jpg",
+    "strip_image": "https://static.w
+
+  PAGE 5: 30 products
+  FULL product[0]:
+{
+  "entity_id": 907,
+  "entity_type_id": 4,
+  "attribute_set_id": 9,
+  "type_id": "simple",
+  "sku": "EGCGBRBLD001",
+  "has_options": 1,
+  "required_options": 0,
+  "created_at": "2019-12-23 07:26:20",
+  "updated_at": "2025-09-30 10:42:40",
+  "cat_index_position": 126,
+  "status": 1,
+  "visibility": 4,
+  "iin": "930000",
+  "add_to_wallet": 1,
+  "product_name": "DUNE-LONDON - LUXE E-Gift Card (Instant Voucher)",
+  "url_key": "luxe-e-gift-dune-london-instant-voucher",
+  "small_image": "/3/1/312x200-luxe-dune_1.png",
+  "brand": "399",
+  "mobile": "/3/1/312x200-luxe-dune_1.png",
+  "sellable_in_market": 0,
+  "market_display_name": null,
+  "couponcode_desc": "From Armani exchange to Hamleys, be spoilt for choice with an option to redeem your Luxe gift card at 30+ global brands.",
+  "card_program_group": "RBL Corp eGift Cards",
+  "min_custom_price": "1000",
+  "max_custom_price": "10000",
+  "category_ids": [
+    2,
+    3,
+    4,
+    12,
+    25,
+    26,
+    53,
+    91,
+    102,
+    125,
+    258,
+    266,
+    267,
+    270,
+    285,
+    289,
+    290,
+    349,
+    353,
+    375,
+    376,
+    436,
+    440,
+    441,
+    443,
+    467,
+    613,
+    614,
+    620,
+    621,
+    661,
+    662,
+    749,
+    763
+  ],
+  "brand_logo": {
+    "small": "https://static.woohoo.in/media/brands_logo/lux-68x68.jpg",
+    "large": "https://static.woohoo.in/media/brands_logo/lux-68x68.jpg"
+  },
+  "id": [
+    2,
+    3,
+    4,
+    12,
+    25,
+    26,
+    53,
+    91,
+    102,
+    125,
+    258,
+    266,
+    267,
+    270,
+    285,
+    289,
+    290,
+    349,
+    353,
+    375,
+    376,
+    436,
+    440,
+    441,
+    443,
+    467,
+    613,
+    614,
+    620,
+    621,
+    661,
+    662,
+    749,
+    763
+  ],
+  "name": "DUNE-LONDON - LUXE E-Gift Card (Instant Voucher)",
+  "product_id": 907,
+  "discounts": [
+    {
+      "startDate": "2025-03-31T18:30:00+0000",
+      "endDate": "2026-04-30T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 10,
+        "desc": "Flat 10% OFF | Applicable on payment via Credit Card, Debit Card, UPI & Net Banking"
+      },
+      "coupon": {
+        "code": "LUXE10"
+      },
+      "priority": 1
+    }
+  ],
+  "cashbacks": [],
+  "redemption_rules": [
+    {
+      "type": "percentage",
+      "amount": 12,
+      "currency": "WoohooCoins"
+    }
+  ],
+  "min_custom_value": "1000",
+  "max_custom_value": "10000",
+  "images": {
+    "small_image": "https://static.woohoo.in/media/catalog/product/3/1/312x200-luxe-dune_1.png",
+    "strip_image": "https://static.woohoo.in/media/catalog/product/3/1/312x200-luxe-dune_1.png",
+    "card_image": {
+      "logo": {
+        "small": "https://static.woohoo.in/media/cardimage/Armani.png",
+        "large": "https://static.woohoo.in/media/cardimage/Armani.png"
+      },
+      "card": {
+        "large": "https://static.woohoo.in/media/cardimage/Luxe_Generic-312x200-GC.png",
+        "small": "https://static.woohoo.in/media/cardimage/Luxe_Generic-312x200-GC.png"
+      }
+    }
+  },
+  "_links": {
+    "self": {
+      "hr
+
+  PAGE 6: 30 products
+  FULL product[0]:
+{
+  "sku": "EGCGBHIT004",
+  "product_name": "HopInTown PLUS Pack of 5 Lifestyle Membership E-Gift Card (Instant Voucher)",
+  "couponcode_desc": null,
+  "brand_logo": {
+    "small": "https://static.woohoo.in/media/brands_logo/hop68x68_2_.jpg",
+    "large": "https://static.woohoo.in/media/brands_logo/hop68x68_2_.jpg"
+  },
+  "id": [
+    2,
+    3,
+    12,
+    14,
+    91,
+    102,
+    125,
+    266,
+    492,
+    493,
+    666,
+    667
+  ],
+  "name": "HopInTown PLUS Pack of 5 Lifestyle Membership E-Gift Card (Instant Voucher)",
+  "product_id": 1393,
+  "discounts": [
+    {
+      "startDate": "2022-07-12T18:30:00+0000",
+      "endDate": "2030-12-31T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 7,
+        "desc": "Flat 7% off. Applicable on payment via UPI."
+      },
+      "coupon": {
+        "code": "HOPIN7"
+      },
+      "priority": 1
+    },
+    {
+      "startDate": "2022-07-12T18:30:00+0000",
+      "endDate": "2030-12-31T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 6,
+        "desc": "Flat 6% OFF | Applicable on payment via Credit Card, Debit Card, UPI & Net Banking"
+      },
+      "coupon": {
+        "code": "HOPIN6"
+      },
+      "priority": 2
+    }
+  ],
+  "cashbacks": [],
+  "redemption_rules": [
+    {
+      "type": "percentage",
+      "amount": 7.000000000000001,
+      "currency": "WoohooCoins"
+    }
+  ],
+  "min_custom_value": "999",
+  "max_custom_value": "999",
+  "images": {
+    "small_image": null,
+    "strip_image": "https://static.woohoo.in/media/catalog/product/h/o/hop312x200_3.jpg",
+    "card_image": {
+      "logo": {
+        "small": "https://static.woohoo.in/media/cardimage/hop68x68_2__2.jpg",
+        "large": "https://static.woohoo.in/media/cardimage/hop68x68_2__2.jpg"
+      },
+      "card": {
+        "large": "https://static.woohoo.in/media/cardimage/hop312x200_2.jpg",
+        "small": "https://static.woohoo.in/media/cardimage/hop312x200_2.jpg"
+      }
+    }
+  },
+  "_links": {
+    "self": {
+      "href": "/product/1393"
+    },
+    "next": {
+      "href": "/product/1404"
+    },
+    "url": {
+      "href": "hopintown-plus-pack-of-5-memberships-258-e-gift-card"
+    }
+  }
+}
+
+  PAGE 7: 30 products
+  FULL product[0]:
+{
+  "sku": "EGCGBETSR004",
+  "product_name": "Faasos E-Gift Card (Instant Voucher)",
+  "couponcode_desc": null,
+  "brand_logo": {
+    "small": "https://static.woohoo.in/media/brands_logo/68x68-100043011.jpg",
+    "large": "https://static.woohoo.in/media/brands_logo/68x68-100043011.jpg"
+  },
+  "id": [
+    2,
+    12,
+    25,
+    31,
+    102,
+    125,
+    266,
+    267,
+    337,
+    618,
+    619
+  ],
+  "name": "Faasos E-Gift Card (Instant Voucher)",
+  "product_id": 1971,
+  "discounts": [
+    {
+      "startDate": "2025-04-06T18:30:00+0000",
+      "endDate": "2026-04-30T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 11,
+        "desc": "Flat 11% OFF | Applicable on payment via UPI"
+      },
+      "coupon": {
+        "code": "EAS11"
+      },
+      "priority": 1
+    },
+    {
+      "startDate": "2025-04-06T18:30:00+0000",
+      "endDate": "2026-04-30T18:29:59+0000",
+      "discount": {
+        "type": "by_percent",
+        "amount": 10,
+        "desc": "Flat 10% OFF | Applicable on payment via UPI, Debit Card, Credit Card, Net Banking"
+      },
+      "coupon": {
+        "code": "EAS10"
+      },
+      "priority": 2
+    }
+  ],
+  "cashbacks": [],
+  "redemption_rules": [
+    {
+      "type": "percentage",
+      "amount": 8,
+      "currency": "WoohooCoins"
+    }
+  ],
+  "min_custom_value": "100",
+  "max_custom_value": "10000",
+  "images": {
+    "small_image": "https://static.woohoo.in/media/catalog/product/f/a/faasos.png",
+    "strip_image": "https://static.woohoo.in/media/catalog/product/f/a/faasos.png",
+    "card_image": {
+      "logo": {
+        "small": "https://static.woohoo.in/media/cardimage/Faasos.png",
+        "large": "https://static.woohoo.in/media/cardimage/Faasos.png"
+      },
+      "card": {
+        "large": "https://static.woohoo.in/media/cardimage/Faasos_3.png",
+        "small": "https://static.woohoo.in/media/cardimage/Faasos_3.png"
+      }
+    }
+  },
+  "_links": {
+    "self": {
+      "href": "/product/1971"
+    },
+    "next": {
+      "href": "/product/1972"
+    },
+    "url": {
+      "href": "faasos-e-gift-card-instant-voucher"
+    }
+  }
+}
+
+  Total products collected: 180
+
+  All fields in product[0]: ['entity_id', 'entity_type_id', 'attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options', 'created_at', 'updated_at', 'cat_index_position', 'status', 'visibility', 'iin', 'add_to_wallet', 'product_name', 'url_key', 'small_image', 'brand', 'mobile', 'sellable_in_market', 'market_display_name', 'couponcode_desc', 'card_program_group', 'min_custom_price', 'max_custom_price', 'category_ids', 'brand_logo', 'id', 'name', 'product_id', 'discounts', 'cashbacks', 'redemption_rules', 'min_custom_value', 'max_custom_value', 'images', '_links']
+    type_id: 'simple'
+    sku: 'EGCGBTCQ001'
+    created_at: '2019-07-08 11:07:21'
+    updated_at: '2026-01-22 05:32:41'
+    iin: '600437'
+    product_name: 'TATA CliQ Fashion E-Gift (Instant Voucher)'
+    url_key: 'tata-cliq'
+    small_image: '/t/a/tata_cliq_fashio-1120x700_2107-gc-pl_logo.png'
+    mobile: '/t/a/tata_cliq_fashio-1120x700_2107-gc-pl_logo.png'
+    card_program_group: 'TUL SCLP B2C eGift Cards'
+    max_custom_price: '10000'
+    name: 'TATA CliQ Fashion E-Gift (Instant Voucher)'
+    max_custom_value: '10000'
+
+============================================================
+DIAGNOSING: Flipkart
+============================================================
+
+  Product titles found in HTML: []
+
+  finalPrice matches: []
+  price field values (first 20): []
+
+  Total products collected: 0
+
+Done.

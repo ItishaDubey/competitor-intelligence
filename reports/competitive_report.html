@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategic Intelligence Report</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f0f2f7;
+  --surface: #ffffff;
+  --border:  #e3e7ef;
+  --primary: #2d3a8c;
+  --accent:  #4f6ef7;
+  --success: #1aab6d;
+  --danger:  #e34b4b;
+  --text:    #1a1f36;
+  --muted:   #6b7391;
+  --radius:  14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text)}
+
+.report-header{
+  background:linear-gradient(135deg,#1a2050 0%,#2d3a8c 60%,#4f6ef7 100%);
+  color:#fff;padding:48px 56px 40px
+}
+.report-header h1{
+  font-family:'DM Serif Display',serif;font-size:2.6rem;font-weight:400;
+  letter-spacing:-.5px;line-height:1.1;margin-bottom:8px
+}
+.report-header .meta{font-size:.9rem;opacity:.7;letter-spacing:.5px}
+
+.report-body{
+  max-width:1280px;margin:0 auto;padding:40px 48px 80px;
+  display:flex;flex-direction:column;gap:24px
+}
+
+.section-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px 32px;
+  box-shadow:0 1px 4px rgba(0,0,0,.04)
+}
+.section-title{
+  font-size:1.2rem;font-weight:700;color:var(--primary);
+  margin-bottom:20px;padding-bottom:12px;
+  border-bottom:2px solid var(--border);letter-spacing:-.2px
+}
+.comp-sub-title{font-size:1rem;font-weight:600;color:var(--text);margin:20px 0 10px}
+
+/* Baseline */
+.stat-row{display:flex;align-items:baseline;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.stat-num{font-size:2.4rem;font-weight:700;color:var(--primary);font-family:'DM Serif Display',serif}
+.stat-label{font-size:1rem;color:var(--muted)}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px}
+.tag{background:#eef1ff;color:var(--primary);font-size:.78rem;font-weight:600;padding:4px 12px;border-radius:20px}
+
+/* Table */
+.table-scroll{overflow-x:auto;margin-top:8px}
+.compare-table{width:100%;border-collapse:collapse;font-size:.87rem}
+.compare-table th{
+  background:#f6f8fe;border:1px solid var(--border);padding:10px 14px;
+  text-align:left;font-weight:600;color:var(--primary);white-space:nowrap
+}
+.compare-table td{
+  border:1px solid var(--border);padding:9px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:.84rem;color:var(--text)
+}
+.compare-table tbody tr:hover td{background:#f9faff}
+.product-name{font-family:'DM Sans',sans-serif!important;font-weight:500;font-size:.9rem!important}
+.variant-cell,.base-price-cell{color:var(--muted);font-size:.82rem!important}
+.cell-lower{color:var(--danger);font-weight:600}
+.cell-higher{color:var(--success);font-weight:600}
+.price-link{color:inherit;text-decoration:none;border-bottom:1px dashed currentColor}
+.price-link:hover{text-decoration:underline}
+.listed-tag{
+  display:inline-block;font-size:.72rem;font-weight:600;
+  background:#eef4ff;color:#4f6ef7;border:1px solid #c7d2fe;
+  padding:1px 7px;border-radius:10px;
+}
+
+/* Badges */
+.badge{
+  display:inline-block;font-size:.72rem;font-weight:700;
+  padding:2px 6px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace
+}
+.badge-down{background:#fce8e8;color:var(--danger)}
+.badge-up{background:#e6f9f0;color:var(--success)}
+.table-note{margin-bottom:12px;font-size:.8rem;color:var(--muted);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+/* Gap lists */
+.gap-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.gap-list li{
+  font-size:.9rem;padding:8px 12px;background:#f8f9ff;
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0
+}
+.gap-product{font-weight:600}
+.comp-price{color:var(--muted);font-size:.84rem;margin-left:4px}
+.no-data{color:var(--muted);font-size:.9rem;font-style:italic}
+
+/* Chip grid (product gaps) */
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{
+  background:#eef1ff;color:var(--primary);font-size:.8rem;
+  font-weight:500;padding:5px 14px;border-radius:20px
+}
+.chip-link{text-decoration:none;transition:background .15s}
+.chip-link:hover{background:#c7d2fe}
+.chip-more{background:#f0f0f0;color:#888}
+
+/* Daily changes */
+.changes-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+  gap:12px;margin-top:4px
+}
+.change-item{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:12px 16px;border-radius:10px;border:1px solid var(--border)
+}
+.change-new    {background:#f0fff7;border-color:#a7f3d0}
+.change-removed{background:#fff5f5;border-color:#fca5a5}
+.change-price  {background:#fffbf0;border-color:#fcd34d}
+.change-icon{font-size:1.4rem;flex-shrink:0}
+.change-comp   {font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.change-product{font-size:.9rem;font-weight:600;margin:3px 0}
+.change-detail {font-size:.82rem;font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.change-link   {color:var(--accent);text-decoration:none;font-weight:700}
+.change-link:hover{text-decoration:underline}
+
+/* Insight card */
+.insight-stats{display:flex;gap:32px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.istat{display:flex;flex-direction:column;gap:2px}
+.istat-num{font-size:1.6rem;font-weight:700;color:var(--primary);font-family:'DM Serif Display',serif;line-height:1}
+.istat-lbl{font-size:.78rem;color:var(--muted)}
+.insight-summary{
+  font-size:.95rem;color:var(--text);background:#f6f8fe;
+  border-left:4px solid var(--accent);padding:12px 16px;
+  border-radius:0 8px 8px 0;margin-bottom:20px;line-height:1.6
+}
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:900px){.insight-grid{grid-template-columns:1fr}}
+.insight-col-title{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px}
+.insight-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.insight-list li{font-size:.88rem;padding:6px 10px 6px 14px;border-left:3px solid var(--border);line-height:1.45;border-radius:0 4px 4px 0}
+.risk-list li{border-color:var(--danger);background:#fff9f9}
+.rec-list  li{border-color:var(--success);background:#f3fdf8}
+.insight-text{white-space:pre-wrap;font-family:'DM Sans',sans-serif;font-size:.9rem;line-height:1.7}
+</style>
+</head>
+<body>
+<header class="report-header">
+  <h1>Strategic Intelligence Report</h1>
+  <p class="meta">Generated: 2026-02-24T14:26:16.415680 &nbsp;|&nbsp; 2 competitor(s) analysed</p>
+</header>
+<main class="report-body">
+  
+    <div class="section-card baseline-card">
+      <div class="section-title">🏠 Baseline: KStore</div>
+      <p class="stat-row">
+        <span class="stat-num">241</span>
+        <span class="stat-label">product variants tracked</span>
+        &nbsp;·&nbsp;
+        <span class="stat-num">44</span>
+        <span class="stat-label">unique brands</span>
+      </p>
+      <div class="tag-row"><span class="tag">Uncategorised: 241</span></div>
+    </div>
+    
+    <div class="section-card">
+      <div class="section-title">📊 Pricing Comparison Matrix</div>
+      <p class="table-note">
+        <span class="badge badge-down">▼ cheaper than baseline</span>
+        <span class="badge badge-up">▲ more expensive than baseline</span>
+        &nbsp;Showing 56 overlapping products · 185 baseline-only products hidden. Click prices to open product page.
+      </p>
+      <div class="table-scroll">
+        <table class="compare-table">
+          <thead><tr><th>Product</th><th>Denomination</th><th>Baseline Price</th><th>Woohoo Price</th><th>Flipkart Price</th></tr></thead>
+          <tbody><tr>
+          <td class="product-name">Google Play Recharge Code</td>
+          <td class="variant-cell">₹49.50</td>
+          <td class="base-price-cell">₹49.50</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/google-play-gift-card/p/itmad3ef1231abb4?pid=GVOHJV5NSPKMTHKM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Google Play Recharge Code</td>
+          <td class="variant-cell">₹97</td>
+          <td class="base-price-cell">₹97</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/google-play-gift-card/p/itmad3ef1231abb4?pid=GVOHJV5NSPKMTHKM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Google Play Recharge Code</td>
+          <td class="variant-cell">₹245</td>
+          <td class="base-price-cell">₹245</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/google-play-gift-card/p/itmad3ef1231abb4?pid=GVOHJV5NSPKMTHKM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Google Play Recharge Code</td>
+          <td class="variant-cell">₹490</td>
+          <td class="base-price-cell">₹490</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/google-play-gift-card/p/itmad3ef1231abb4?pid=GVOHJV5NSPKMTHKM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Google Play Recharge Code</td>
+          <td class="variant-cell">₹970</td>
+          <td class="base-price-cell">₹970</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/google-play-gift-card/p/itmad3ef1231abb4?pid=GVOHJV5NSPKMTHKM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Google Play Recharge Code</td>
+          <td class="variant-cell">₹1,940</td>
+          <td class="base-price-cell">₹1,940</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/google-play-gift-card/p/itmad3ef1231abb4?pid=GVOHJV5NSPKMTHKM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Zomato</td>
+          <td class="variant-cell">₹495</td>
+          <td class="base-price-cell">₹495</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/zomato-restaurant-digital-gift-card/p/itm860c9eea3f714?pid=GVOGJZWZENBRVAH4" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Zomato</td>
+          <td class="variant-cell">₹990</td>
+          <td class="base-price-cell">₹990</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/zomato-restaurant-digital-gift-card/p/itm860c9eea3f714?pid=GVOGJZWZENBRVAH4" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Zomato</td>
+          <td class="variant-cell">₹2,475</td>
+          <td class="base-price-cell">₹2,475</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/zomato-restaurant-digital-gift-card/p/itm860c9eea3f714?pid=GVOGJZWZENBRVAH4" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Zomato</td>
+          <td class="variant-cell">₹4,950</td>
+          <td class="base-price-cell">₹4,950</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/zomato-restaurant-digital-gift-card/p/itm860c9eea3f714?pid=GVOGJZWZENBRVAH4" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Valorant</td>
+          <td class="variant-cell">₹408.00</td>
+          <td class="base-price-cell">₹408.00</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Valorant</td>
+          <td class="variant-cell">₹2,049.00</td>
+          <td class="base-price-cell">₹2,049.00</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Valorant</td>
+          <td class="variant-cell">₹2,869.00</td>
+          <td class="base-price-cell">₹2,869.00</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Myntra</td>
+          <td class="variant-cell">₹196</td>
+          <td class="base-price-cell">₹196</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/myntra-digital-gift-card/p/itma1159399cdde9?pid=GVOHGGQYK2MN82WJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Myntra</td>
+          <td class="variant-cell">₹242.50</td>
+          <td class="base-price-cell">₹242.50</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/myntra-digital-gift-card/p/itma1159399cdde9?pid=GVOHGGQYK2MN82WJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Myntra</td>
+          <td class="variant-cell">₹485</td>
+          <td class="base-price-cell">₹485</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/myntra-digital-gift-card/p/itma1159399cdde9?pid=GVOHGGQYK2MN82WJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Myntra</td>
+          <td class="variant-cell">₹970</td>
+          <td class="base-price-cell">₹970</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/myntra-digital-gift-card/p/itma1159399cdde9?pid=GVOHGGQYK2MN82WJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Myntra</td>
+          <td class="variant-cell">₹1,455</td>
+          <td class="base-price-cell">₹1,455</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/myntra-digital-gift-card/p/itma1159399cdde9?pid=GVOHGGQYK2MN82WJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Myntra</td>
+          <td class="variant-cell">₹1,940</td>
+          <td class="base-price-cell">₹1,940</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/myntra-digital-gift-card/p/itma1159399cdde9?pid=GVOHGGQYK2MN82WJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Myntra</td>
+          <td class="variant-cell">₹2,425</td>
+          <td class="base-price-cell">₹2,425</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/myntra-digital-gift-card/p/itma1159399cdde9?pid=GVOHGGQYK2MN82WJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Riot Valorant Digital Code</td>
+          <td class="variant-cell">₹402.55</td>
+          <td class="base-price-cell">₹402.55</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Riot Valorant Digital Code</td>
+          <td class="variant-cell">₹805.10</td>
+          <td class="base-price-cell">₹805.10</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Riot Valorant Digital Code</td>
+          <td class="variant-cell">₹1,610.20</td>
+          <td class="base-price-cell">₹1,610.20</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Riot Valorant Digital Code</td>
+          <td class="variant-cell">₹2,813</td>
+          <td class="base-price-cell">₹2,813</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Riot Valorant Digital Code</td>
+          <td class="variant-cell">₹3,984</td>
+          <td class="base-price-cell">₹3,984</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Riot Valorant Digital Code</td>
+          <td class="variant-cell">₹7,996.80</td>
+          <td class="base-price-cell">₹7,996.80</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Kalyan Diamond Jewellery Gift Voucher</td>
+          <td class="variant-cell">₹970</td>
+          <td class="base-price-cell">₹970</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/kalyan-jewellers-gold-jewellery-digital-gift-card/p/itmb98a449f8f972?pid=GVOGFVZ2PXR68EFR" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Kalyan Diamond Jewellery Gift Voucher</td>
+          <td class="variant-cell">₹1,900</td>
+          <td class="base-price-cell">₹1,900</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/kalyan-jewellers-gold-jewellery-digital-gift-card/p/itmb98a449f8f972?pid=GVOGFVZ2PXR68EFR" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Kalyan Diamond Jewellery Gift Voucher</td>
+          <td class="variant-cell">₹4,700</td>
+          <td class="base-price-cell">₹4,700</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/kalyan-jewellers-gold-jewellery-digital-gift-card/p/itmb98a449f8f972?pid=GVOGFVZ2PXR68EFR" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Kalyan Diamond Jewellery Gift Voucher</td>
+          <td class="variant-cell">₹9,400</td>
+          <td class="base-price-cell">₹9,400</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/kalyan-jewellers-gold-jewellery-digital-gift-card/p/itmb98a449f8f972?pid=GVOGFVZ2PXR68EFR" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Kalyan Gold Jewellery</td>
+          <td class="variant-cell">₹990</td>
+          <td class="base-price-cell">₹990</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/kalyan-jewellers-gold-jewellery-digital-gift-card/p/itmb98a449f8f972?pid=GVOGFVZ2PXR68EFR" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Kalyan Gold Jewellery</td>
+          <td class="variant-cell">₹1,980</td>
+          <td class="base-price-cell">₹1,980</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/kalyan-jewellers-gold-jewellery-digital-gift-card/p/itmb98a449f8f972?pid=GVOGFVZ2PXR68EFR" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Kalyan Gold Jewellery</td>
+          <td class="variant-cell">₹2,475</td>
+          <td class="base-price-cell">₹2,475</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/kalyan-jewellers-gold-jewellery-digital-gift-card/p/itmb98a449f8f972?pid=GVOGFVZ2PXR68EFR" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Kalyan Gold Jewellery</td>
+          <td class="variant-cell">₹4,950</td>
+          <td class="base-price-cell">₹4,950</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/kalyan-jewellers-gold-jewellery-digital-gift-card/p/itmb98a449f8f972?pid=GVOGFVZ2PXR68EFR" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Unipin</td>
+          <td class="variant-cell">₹72</td>
+          <td class="base-price-cell">₹72</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/unipin-digital-gift-card/p/itmeb720a2ef2d51?pid=GVOHFUHGX3GKC37N" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Unipin</td>
+          <td class="variant-cell">₹361</td>
+          <td class="base-price-cell">₹361</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/unipin-digital-gift-card/p/itmeb720a2ef2d51?pid=GVOHFUHGX3GKC37N" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Unipin</td>
+          <td class="variant-cell">₹705</td>
+          <td class="base-price-cell">₹705</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/unipin-digital-gift-card/p/itmeb720a2ef2d51?pid=GVOHFUHGX3GKC37N" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Lifestyle B2C E-Gift Card-Online</td>
+          <td class="variant-cell">₹500</td>
+          <td class="base-price-cell">₹500</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/lenskart-lifestyle-accessories-digital-gift-card/p/itm275bf127b7cd6?pid=GVOHG8XYHZJ4JZFH" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Lifestyle B2C E-Gift Card-Online</td>
+          <td class="variant-cell">₹1,000</td>
+          <td class="base-price-cell">₹1,000</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/lenskart-lifestyle-accessories-digital-gift-card/p/itm275bf127b7cd6?pid=GVOHG8XYHZJ4JZFH" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Lifestyle B2C E-Gift Card-Online</td>
+          <td class="variant-cell">₹2,500</td>
+          <td class="base-price-cell">₹2,500</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/lenskart-lifestyle-accessories-digital-gift-card/p/itm275bf127b7cd6?pid=GVOHG8XYHZJ4JZFH" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Lifestyle B2C E-Gift Card-Online</td>
+          <td class="variant-cell">₹3,000</td>
+          <td class="base-price-cell">₹3,000</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/lenskart-lifestyle-accessories-digital-gift-card/p/itm275bf127b7cd6?pid=GVOHG8XYHZJ4JZFH" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Lifestyle B2C E-Gift Card-Online</td>
+          <td class="variant-cell">₹5,000</td>
+          <td class="base-price-cell">₹5,000</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/lenskart-lifestyle-accessories-digital-gift-card/p/itm275bf127b7cd6?pid=GVOHG8XYHZJ4JZFH" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Lifestyle B2C E-Gift Card-Online</td>
+          <td class="variant-cell">₹9,600</td>
+          <td class="base-price-cell">₹9,600</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/lenskart-lifestyle-accessories-digital-gift-card/p/itm275bf127b7cd6?pid=GVOHG8XYHZJ4JZFH" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Ajio E-Gift Voucher</td>
+          <td class="variant-cell">₹97</td>
+          <td class="base-price-cell">₹97</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Ajio E-Gift Voucher</td>
+          <td class="variant-cell">₹242.50</td>
+          <td class="base-price-cell">₹242.50</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Ajio E-Gift Voucher</td>
+          <td class="variant-cell">₹485</td>
+          <td class="base-price-cell">₹485</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Ajio E-Gift Voucher</td>
+          <td class="variant-cell">₹970</td>
+          <td class="base-price-cell">₹970</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Ajio E-Gift Voucher</td>
+          <td class="variant-cell">₹1,940</td>
+          <td class="base-price-cell">₹1,940</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Ajio E-Gift Voucher</td>
+          <td class="variant-cell">₹2,910</td>
+          <td class="base-price-cell">₹2,910</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Ajio E-Gift Voucher</td>
+          <td class="variant-cell">₹4,850</td>
+          <td class="base-price-cell">₹4,850</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Ajio E-Gift Voucher</td>
+          <td class="variant-cell">₹9,700</td>
+          <td class="base-price-cell">₹9,700</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">ZEE5</td>
+          <td class="variant-cell">₹399</td>
+          <td class="base-price-cell">₹399</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/zee5-1month-hd-subscription-digital-gift-card/p/itm7f694d242bd0e?pid=GVOHG82CCWQCXUEJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">ZEE5</td>
+          <td class="variant-cell">₹643.08</td>
+          <td class="base-price-cell">₹643.08</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/zee5-1month-hd-subscription-digital-gift-card/p/itm7f694d242bd0e?pid=GVOHG82CCWQCXUEJ" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Fastrack Bags</td>
+          <td class="variant-cell">₹480</td>
+          <td class="base-price-cell">₹480</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/fastrack-digital-gift-card/p/itmbd243913966cc?pid=GVOHK3WHZBZFZE3N" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Fastrack Bags</td>
+          <td class="variant-cell">₹960</td>
+          <td class="base-price-cell">₹960</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/fastrack-digital-gift-card/p/itmbd243913966cc?pid=GVOHK3WHZBZFZE3N" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr><tr>
+          <td class="product-name">Fastrack Bags</td>
+          <td class="variant-cell">₹1,920</td>
+          <td class="base-price-cell">₹1,920</td>
+        <td class="">–</td><td class=""><a href="https://www.flipkart.com/fastrack-digital-gift-card/p/itmbd243913966cc?pid=GVOHK3WHZBZFZE3N" target="_blank" class="price-link"><span class="listed-tag">Listed</span></a></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section-card"><div class="section-title">🔼 Variant Expansion Insights</div><h3 class="comp-sub-title">Woohoo</h3><p class="no-data">No variant gaps detected.</p><h3 class="comp-sub-title">Flipkart</h3><p class="no-data">No variant gaps detected.</p></div><div class="section-card"><div class="section-title">🕳️ Product Gap Analysis</div><p class="table-note">Brands carried by competitors that are <strong>not on your baseline</strong>.</p><h3 class="comp-sub-title">Woohoo has 0 brand(s) not in baseline</h3><p class="no-data warn-data">⚠️ No products were scraped from this competitor. Try updating the competitor URL to their gift card catalog page (e.g. woohoo.in/gift-cards) and run again.</p><h3 class="comp-sub-title">Flipkart has 10 brand(s) not in baseline</h3><div class="chip-grid"><a href="https://www.flipkart.com/max-fashion-offline-clothing-digital-gift-card/p/itmcd38c22ba9f3d?pid=GVOH6WKHQXGV7S7H" target="_blank" class="chip chip-link">Max Fashion Offline Clothing Digital Gift Card</a><a href="https://www.flipkart.com/reliance-smart-digital-gift-card/p/itm07328a45c65e7?pid=GVOGW3DJHWDHTAZJ" target="_blank" class="chip chip-link">Reliance smart Digital Gift Card</a><a href="https://www.flipkart.com/steam-lysto-e-gift-voucher-digital-gift-card/p/itme4d6ff7665794?pid=GVOHFUHYHRC97RFH" target="_blank" class="chip chip-link">Steam Lysto E-Gift Voucher Digital Gift Card</a><a href="https://www.flipkart.com/eatsure-restaurant-digital-gift-card/p/itm2265e3dd5e82e?pid=GVOHHEEGEVGUKVQG" target="_blank" class="chip chip-link">EatSure Restaurant Digital Gift Card</a><a href="https://www.flipkart.com/hammer-electronics-digital-gift-card/p/itma40aa97c9ff43?pid=GVOHHEEGD9FH8TNY" target="_blank" class="chip chip-link">Hammer Electronics Digital Gift Card</a><a href="https://www.flipkart.com/levi-s-digital-gift-card/p/itm08b8bd3ae7f9c?pid=GVOHHMFCG3MWDYNH" target="_blank" class="chip chip-link">Levi's Digital Gift Card</a><a href="https://www.flipkart.com/skechers-digital-gift-card/p/itmf035d04b5d509?pid=GVOGZV6UE9MXUD22" target="_blank" class="chip chip-link">Skechers Digital Gift Card</a><a href="https://www.flipkart.com/beyoung-clothing-digital-gift-card/p/itm192c2f663ed99?pid=GVOHHEEGGU7MD5H3" target="_blank" class="chip chip-link">Beyoung Clothing Digital Gift Card</a><a href="https://www.flipkart.com/hoichoi-movie-cinema-digital-gift-card/p/itm6a00b76c4617d?pid=GVOHG4Y3WFQDN7ZH" target="_blank" class="chip chip-link">Hoichoi Movie / Cinema Digital Gift Card</a><a href="https://www.flipkart.com/pizza-hut-restaurant-digital-gift-card/p/itm536b746d03a5e?pid=GVOFWJNZRFG6YJH3" target="_blank" class="chip chip-link">Pizza Hut Restaurant Digital Gift Card</a></div></div><div class="section-card"><div class="section-title">📈 Daily Changes (12 detected)</div><div class="change-summary-pills"><span class="pill pill-new">🆕 9 New</span><span class="pill pill-removed">🗑️ 3 Delisted</span></div><div class="changes-grid">
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/valorant-digital-gift-card/p/itm1fce65c1162ca?pid=GVOHJZHWDZBZHGPM" target="_blank" class="change-link">Valorant Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/reliance-jio-mart-digital-gift-card/p/itmcb0f6999cb6f0?pid=GVOH4N9YR2RRYGNB" target="_blank" class="change-link">Reliance Jio Mart Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/beyoung-clothing-digital-gift-card/p/itm192c2f663ed99?pid=GVOHHEEGGU7MD5H3" target="_blank" class="change-link">Beyoung Clothing Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/ajio-digital-gift-card/p/itmdb7fd5666c80d?pid=GVOHYYPBKH8HZETF" target="_blank" class="change-link">AJIO Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/hoichoi-movie-cinema-digital-gift-card/p/itm6a00b76c4617d?pid=GVOHG4Y3WFQDN7ZH" target="_blank" class="change-link">Hoichoi Movie / Cinema Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/zee5-1month-hd-subscription-digital-gift-card/p/itm7f694d242bd0e?pid=GVOHG82CCWQCXUEJ" target="_blank" class="change-link">Zee5 1Month HD Subscription Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/pizza-hut-restaurant-digital-gift-card/p/itm536b746d03a5e?pid=GVOFWJNZRFG6YJH3" target="_blank" class="change-link">Pizza Hut Restaurant Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/lenskart-lifestyle-accessories-digital-gift-card/p/itm275bf127b7cd6?pid=GVOHG8XYHZJ4JZFH" target="_blank" class="change-link">LENSKART Lifestyle Accessories Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-new">
+                    <span class="change-icon">🆕</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · New product</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/fastrack-digital-gift-card/p/itmbd243913966cc?pid=GVOHK3WHZBZFZE3N" target="_blank" class="change-link">Fastrack Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Newly listed</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-removed">
+                    <span class="change-icon">🗑️</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · Delisted</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/mokobara-digital-gift-card/p/itm4ef2f8a57f164?pid=GVOHKMZZPJUZVG27" target="_blank" class="change-link">Mokobara Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Delisted</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-removed">
+                    <span class="change-icon">🗑️</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · Delisted</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/flipkart-bharatyatra-ncmc/p/itm1dfa2bcc776cf?pid=PGVHCD8CWJZGZGDQ" target="_blank" class="change-link">Flipkart BharatYatra NCMC ↗</a></div>
+                      <div class="change-detail">Delisted</div>
+                    </div>
+                  </div>
+                
+                  <div class="change-item change-removed">
+                    <span class="change-icon">🗑️</span>
+                    <div class="change-body">
+                      <div class="change-comp">Flipkart · Delisted</div>
+                      <div class="change-product"><a href="https://www.flipkart.com/bhima-jewellers-gold-jewellery-digital-gift-card/p/itm9c35d6e0c5965?pid=GVOG8ZBW3GNFVZCH" target="_blank" class="change-link">Bhima Jewellers Gold Jewellery Digital Gift Card ↗</a></div>
+                      <div class="change-detail">Delisted</div>
+                    </div>
+                  </div>
+                </div></div>
+    <div class="section-card insight-card">
+      <div class="section-title">🎯 Woohoo</div>
+
+      <div class="insight-stats">
+        <div class="istat">
+          <span class="istat-num">0</span>
+          <span class="istat-lbl">Matched SKUs</span>
+        </div>
+        <div class="istat">
+          <span class="istat-num">0</span>
+          <span class="istat-lbl">Brands Baseline Is Missing</span>
+        </div>
+        <div class="istat">
+          <span class="istat-num">–––</span>
+          <span class="istat-lbl">Price Range</span>
+        </div>
+      </div>
+
+      <p class="insight-summary">Could not retrieve enough data from Woohoo in this scan. Price scraping was limited — try running again with the competitor's full gift card catalog URL for better results.</p>
+
+      <div class="insight-grid">
+        <div class="insight-col">
+          <div class="insight-col-title">🕳️ Product Gaps</div>
+          <p class="no-data">None identified.</p>
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-title">↔️ Variant Gaps</div>
+          <p class="no-data">None identified.</p>
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-title">⚠️ Pricing Risks</div>
+          <p class="no-data">None identified.</p>
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-title">✅ Recommendations</div>
+          <ul class='insight-list rec-list'><li>Run agent with Woohoo's full gift card catalog URL to get complete pricing intelligence</li></ul>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section-card insight-card">
+      <div class="section-title">🎯 Flipkart</div>
+
+      <div class="insight-stats">
+        <div class="istat">
+          <span class="istat-num">11</span>
+          <span class="istat-lbl">Matched SKUs</span>
+        </div>
+        <div class="istat">
+          <span class="istat-num">10</span>
+          <span class="istat-lbl">Brands Baseline Is Missing</span>
+        </div>
+        <div class="istat">
+          <span class="istat-num">–––</span>
+          <span class="istat-lbl">Price Range</span>
+        </div>
+      </div>
+
+      <p class="insight-summary">Flipkart carries 10 brand(s) not available on KStore, representing a potential catalogue gap. Both platforms price similarly on overlapping SKUs.</p>
+
+      <div class="insight-grid">
+        <div class="insight-col">
+          <div class="insight-col-title">🕳️ Product Gaps</div>
+          <ul class='insight-list '><li>'Max Fashion Offline Clothing Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'Reliance smart Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'Steam Lysto E-Gift Voucher Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'EatSure Restaurant Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'Hammer Electronics Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'Levi's Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'Skechers Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'Beyoung Clothing Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'Hoichoi Movie / Cinema Digital Gift Card' — carried by Flipkart but not on KStore</li><li>'Pizza Hut Restaurant Digital Gift Card' — carried by Flipkart but not on KStore</li></ul>
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-title">↔️ Variant Gaps</div>
+          <p class="no-data">None identified.</p>
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-title">⚠️ Pricing Risks</div>
+          <p class="no-data">None identified.</p>
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-title">✅ Recommendations</div>
+          <ul class='insight-list rec-list'><li>Prioritise onboarding 10 missing brands — start with: Max Fashion Offline Clothing Digital Gift Card, Reliance smart Digital Gift Card, Steam Lysto E-Gift Voucher Digital Gift Card</li></ul>
+        </div>
+      </div>
+    </div>
+    
+</main>
+</body>
+</html>

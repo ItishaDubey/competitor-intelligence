@@ -1,0 +1,119 @@
+
+============================================================
+DIAGNOSING: Woohoo
+============================================================
+
+📡 API calls captured: 9
+  [  1643 chars] https://cdn.segment.com/v1/projects/PrFaOSMfTURKDeeYCttuuPVwNSEfeTCE/settings
+           {"_lastModified": "2026-02-17T06:59:37.146Z", "integrations": {"Google Tag Manager": {"containerId": "GTM-NL9NFK", "trac
+  [  3081 chars] https://www.woohoo.in/proxy/cms/static?id=login_block,group_gift_login_block
+           {"api": "static", "status": 200, "data": {"_embedded": {"login_block": [{"title": "Login Block", "content": "<div class=
+  [    17 chars] https://api.segment.io/v1/p
+           {"success": true}
+  [   882 chars] https://ekr.zdassets.com/compose/zopim_chat/1DLvNyvWrULvHGIxLqWdW6myRKNJ9Hfv
+           {"products": [{"name": "web_widget", "id": "kumarsn.zendesk.com", "bootstrap": {"config": {"features": {}, "color": "#f8
+  [   524 chars] https://kumarsn.zendesk.com/embeddable/config
+           {"brand": "Kumar S N", "brandCount": 0, "color": "#f8b900", "cp4": true, "embeds": {"chat": {"embed": "chat", "props": {
+  [ 75550 chars] https://www.woohoo.in/proxy/category/102?page=2
+           {"api": "category", "status": 200, "data": {"id": 102, "name": "More Brands - Gift Cards", "thumbnail": "", "image": "",
+  [ 79980 chars] https://www.woohoo.in/proxy/category/102?page=3
+           {"api": "category", "status": 200, "data": {"id": 102, "name": "More Brands - Gift Cards", "thumbnail": "", "image": "",
+  [ 76155 chars] https://www.woohoo.in/proxy/category/102?page=4
+           {"api": "category", "status": 200, "data": {"id": 102, "name": "More Brands - Gift Cards", "thumbnail": "", "image": "",
+  [ 74149 chars] https://www.woohoo.in/proxy/category/102?page=5
+           {"api": "category", "status": 200, "data": {"id": 102, "name": "More Brands - Gift Cards", "thumbnail": "", "image": "",
+
+📜 Script tags: 5
+  src=inline
+  text={"email":"mailto:support@woohoo.in","sameAs":[["https://facebook.com/woohoogifting","https://twitter.com/woohoogifting","https://instagram.com/woohoog
+  src=inline
+  text=
+        window.__INITIAL_STATE = {"reduxAsyncConnect":{"loaded":true,"loadState":{}},"appReducer":{"category":{"api":"category","status":200,"data":{
+  src=inline
+  text=(function(){var a=window._fbq||(window._fbq=[]);if(!a.loaded){var b=document.createElement("script");b.async=!0;b.src="//connect.facebook.net/en_US/fb
+  src=inline
+  text=!function(b,e,f,g,a,c,d){b.fbq||(a=b.fbq=function(){a.callMethod?a.callMethod.apply(a,arguments):a.queue.push(arguments)},b._fbq||(b._fbq=a),a.push=a,
+  src=inline
+  text=!function(b,e,f,g,a,c,d){b.fbq||(a=b.fbq=function(){a.callMethod?a.callMethod.apply(a,arguments):a.queue.push(arguments)},b._fbq||(b._fbq=a),a.push=a,
+
+🌐 HTML snippet:
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="origin-trial" content="A7vZI3v+Gz7JfuRolKNM4Aff6zaGuT7X0mf3wtoZTnKv6497cVMnhy03KDqX7kBz/q/iidW7srW31oQbBt4VhgoAAACUeyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGUuY29tOjQ0MyIsImZlYXR1cmUiOiJEaXNhYmxlVGhpcmRQYXJ0eVN0b3JhZ2VQYXJ0aXRpb25pbmczIiwiZXhwaXJ5IjoxNzU3OTgwODAwLCJpc1N1YmRvbWFpbiI6dHJ1ZSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ==">
+      <base data-react-helmet="true" target="_blank" rel="noopener,noreferrer" href="https://www.woohoo.in">
+      <title>Gift Cards | Choose from 200+ Brands</title>
+      <meta data-react-helmet="true" name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"><meta data-react-helmet="true" charset="utf-8"><meta data-react-helmet="true" name="keywords" content=""><meta data-react-helmet="true" name="theme-color" content="#069688"><meta data-react-helmet="true" name="mobile-web-app-capable" content="yes"><meta data-react-helmet="true" name="msapplication-navb
+
+🔍 Looking for product data in API responses...
+
+  ✅ PROMISING: https://www.woohoo.in/proxy/cms/static?id=login_block,group_gift_login_block
+
+  ✅ PROMISING: https://ekr.zdassets.com/compose/zopim_chat/1DLvNyvWrULvHGIxLqWdW6myRKNJ9Hfv
+
+  ✅ PROMISING: https://kumarsn.zendesk.com/embeddable/config
+
+  ✅ PROMISING: https://www.woohoo.in/proxy/category/102?page=2
+    Array at .data._embedded.products: 30 items, keys=['entity_id', 'entity_type_id', 'attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options', 'created_at']
+    Sample: {"entity_id": 823, "entity_type_id": 4, "attribute_set_id": 9, "type_id": "simple", "sku": "EGCGBTCQ001", "has_options": 1, "required_options": 0, "created_at": "2019-07-08 11:07:21", "updated_at": "2
+
+  ✅ PROMISING: https://www.woohoo.in/proxy/category/102?page=3
+    Array at .data._embedded.products: 30 items, keys=['entity_id', 'entity_type_id', 'attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options', 'created_at']
+    Sample: {"entity_id": 2148, "entity_type_id": 4, "attribute_set_id": 9, "type_id": "simple", "sku": "EGCGBWRNGLR001", "has_options": 1, "required_options": 0, "created_at": "2023-10-05 06:08:55", "updated_at"
+
+  ✅ PROMISING: https://www.woohoo.in/proxy/category/102?page=4
+    Array at .data._embedded.products: 30 items, keys=['entity_id', 'entity_type_id', 'attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options', 'created_at']
+    Sample: {"entity_id": 24, "entity_type_id": 4, "attribute_set_id": 9, "type_id": "simple", "sku": "MGVGBPLF001", "has_options": 1, "required_options": 1, "created_at": "2015-09-02 09:31:07", "updated_at": "20
+
+  ✅ PROMISING: https://www.woohoo.in/proxy/category/102?page=5
+    Array at .data._embedded.products: 30 items, keys=['entity_id', 'entity_type_id', 'attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options', 'created_at']
+    Sample: {"entity_id": 907, "entity_type_id": 4, "attribute_set_id": 9, "type_id": "simple", "sku": "EGCGBRBLD001", "has_options": 1, "required_options": 0, "created_at": "2019-12-23 07:26:20", "updated_at": "
+
+============================================================
+DIAGNOSING: Flipkart
+============================================================
+
+📡 API calls captured: 5
+  [  1410 chars] https://1.rome.api.flipkart.com/api/1/connekt/push/callback
+           {"CACHE_INVALIDATION_TTL": "0", "META_INFO": {"abContext": {"abWrapper": [{"abId": "STG|launchedGroup|46aeb36d|h"}]}, "a
+  [   287 chars] https://sonic.fdp.api.flipkart.com/4/data/collector/business
+           {"RESPONSE": {"id": "1", "dc": "CH"}, "META_INFO": {"appConfigHash": null, "clientConfigHashMap": null, "dcInfo": {"id":
+  [   287 chars] https://sonic.fdp.api.flipkart.com/4/data/collector/business
+           {"RESPONSE": {"id": "1", "dc": "CH"}, "META_INFO": {"appConfigHash": null, "clientConfigHashMap": null, "dcInfo": {"id":
+  [    75 chars] https://1.sonic.fdp.api.flipkart.com/4/data/collector/business
+           {"RESPONSE": "{}", "REQUEST-ID": null, "REQUEST": null, "STATUS_CODE": 200}
+  [    75 chars] https://1.sonic.fdp.api.flipkart.com/4/data/collector/business
+           {"RESPONSE": "{}", "REQUEST-ID": null, "REQUEST": null, "STATUS_CODE": 200}
+
+📜 Script tags: 8
+  src=inline
+  text=if (/*@cc_on!@*/false) {
+			window.browserVersion = 'IE10';
+			document.documentElement.className += ' ie10';
+		}
+  src=inline
+  text=;window.NREUM||(NREUM={});NREUM.init={distributed_tracing:{enabled:true},privacy:{cookies_enabled:true},ajax:{deny_list:["bam.nr-data.net"]}};
+
+			;NR
+  src=inline
+  text=if(window.newrelic){if(window.newrelic.addRelease){window.newrelic.addRelease("fk-cp-zion", "8.14.0")}if(window.newrelic.setCurrentRouteName){window.n
+  src=inline
+  text=!function(){if("PerformancePaintTiming" in window){var e=window.__perf={e:[]};e.o=new PerformanceObserver(function(n){e.e=e.e.concat(n.getEntries())})
+  src=inline
+  text=window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments)};
+		gtag('js', new Date());
+
+		const pageUri = window.location.
+  src=inline
+  text=[{"@context":"https://schema.org","@type":"ItemList","itemListElement":[{"@type":"ListItem","name":"Reliance smart Digital Gift Card","position":1,"ur
+  src=inline
+  text=window.omniture={tpv:[],tl:[]};window.omniture.trackPageView=function(){window.omniture.tpv.push(arguments)};window.omniture.trackLink=function(){wind
+  src=inline
+  text=function isMobile(){
+		if (!!(navigator.userAgentData && navigator.userAgentData.mobile) || navigator.userAgent.indexOf("Mobile") !== -1){
+			return t
+
+🌐 HTML snippet:
+<!DOCTYPE html><html lang="en"><head><script type="text/javascript" async="async" src="https://flipkart.d1.sc.omtrdc.net/id?d_visid_ver=1.5.4&amp;callback=s_c_il%5B0%5D._setAnalyticsFields&amp;mcorgid=17EB401053DAF4840A490D4C%40AdobeOrg&amp;mid=03578552181613241303046420617071117402"></script><script type="text/javascript" async="async" src="https://dpm.demdex.net/id?d_visid_ver=1.5.4&amp;d_rtbd=json&amp;d_ver=2&amp;d_orgid=17EB401053DAF4840A490D4C%40AdobeOrg&amp;d_nsid=0&amp;d_cb=s_c_il%5B0%5D._setMarketingCloudFields"></script><link href="https://rukminim2.flixcart.com" rel="preconnect"><link rel="stylesheet" href="//static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/css/bundle.aa1465.css"><link rel="stylesheet" href="//static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/css/bundle.fbaef9.css"><meta http-equiv="Content-type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge"><meta property="fb:page_id" content="102988293558"><meta
+
+🔍 Looking for product data in API responses...
+
+Done.

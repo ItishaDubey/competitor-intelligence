@@ -1,0 +1,98 @@
+name: Daily Competitive Intelligence Scan
+
+on:
+  schedule:
+    # Runs daily at 9 AM UTC (2:30 PM IST)
+    - cron: '0 9 * * *'
+  
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      config:
+        description: 'Config file path (default: test_config.json)'
+        required: false
+        default: 'test_config.json'
+
+jobs:
+  intelligence-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+
+    - name: Install Playwright browsers
+      run: |
+        playwright install chromium --with-deps
+
+    - name: Run CI Agent
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        CONFIG_PATH: ${{ github.event.inputs.config || 'test_config.json' }}
+      run: |
+        python run_agent.py --config "$CONFIG_PATH"
+
+    - name: Upload reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ci-reports-${{ github.run_number }}-${{ github.run_attempt }}
+        path: |
+          reports/competitive_report.html
+          intelligence_data/report_latest.json
+        retention-days: 30
+
+    - name: Upload history snapshot
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: history-snapshot-${{ github.run_number }}
+        path: intelligence_data/history/
+        retention-days: 90
+
+    - name: Commit history snapshot
+      if: success()
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "CI Agent Bot"
+        git add intelligence_data/history/ || true
+        git diff --staged --quiet || \
+          git commit -m "📊 Daily snapshot – $(date +'%Y-%m-%d %H:%M UTC')"
+        git push || echo "Nothing to push"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create run summary
+      if: always()
+      run: |
+        echo "## 🤖 CI Agent Daily Scan" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Date:** $(date +'%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f intelligence_data/report_latest.json ]; then
+          echo "✅ **Report generated successfully**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📥 Download the artifacts above to view the HTML report" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Report generation failed**" >> $GITHUB_STEP_SUMMARY
+        fi

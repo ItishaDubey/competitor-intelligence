@@ -50,7 +50,7 @@ def check_dependencies():
 def check_imports():
     try:
         # Simulate how Uvicorn imports the app
-        from backend.server import app
+        from backend.server_v2 import app
         print_status("Backend Code", True, "backend/server.py compiles successfully")
     except ImportError as e:
         print_status("Backend Code", False, f"Import Error: {e}")
